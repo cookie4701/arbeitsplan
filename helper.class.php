@@ -31,17 +31,17 @@ class Helper {
 	
 	//! Parameterless constructor
 	
-	/**
-	 * The constructor tries to establish a database connection. The variables $dbuser, $dbpass, $dbserver and $dbname needs to be filled out in file config.php <br>
-	 * If an error occurs an errormessage is printed out.
-	 */
-
 	public function __construct () {
 		
 		try {
-			$this->dbx = new DatabaseConnection(CConfig::$dbhost, CConfig::$dbuser, CConfig::$dbpass, CConfig::$dbname);
-			$this->dbx->getDatabaseConnection()->query("SET NAMES 'utf8'");
-			$this->dbx->getDatabaseConnection()->set_charset("utf8");
+                $this->dbx = new DatabaseConnection(
+                        CConfig::$dbhost,
+                        CConfig::$dbuser,
+                        CConfig::$dbpass,
+                        CConfig::$dbname);
+
+                $this->dbx->getDatabaseConnection()->query("SET NAMES 'utf8'");
+                $this->dbx->getDatabaseConnection()->set_charset("utf8");
 		}
 		
 		catch (Exception $ex) {
@@ -63,7 +63,7 @@ class Helper {
 	//! Get number of workareas
 	
 	public function getNumberWorkareas() {
-		$max_rank_workfields = CConfig::$max_rank_workfields;
+                $max_rank_workfields = CConfig::$max_rank_workfields;
 		return $max_rank_workfields;
 	}
 	
@@ -76,7 +76,8 @@ class Helper {
 	 *  @param $month Month of date
 	 *  @param $year Year of date
 	 *  
-	 *  @return array: Times from and to, if no records are found a NULL is returned
+         *  @return array: Times from and to, if no records are 
+         *          found a NULL is returned
 	 */
 	
 	public function getTimes($userid, $day, $month, $year) {
@@ -85,8 +86,12 @@ class Helper {
 		$times['from'] = array();
 		$times['to'] = array();
 		
-		$buildDate = $year . "-" . $month . "-" . $day; 
-		if ( $stmt->prepare("SELECT timefrom, timeto FROM " . CConfig::$db_tbl_prefix . "timefromto WHERE user_id=? AND dateofday=? ORDER BY timefrom") ) {
+                $buildDate = $year . "-" . $month . "-" . $day; 
+                $sql = "SELECT timefrom, timeto, FROM ";
+                $sql .= CConfig::$db_tbl_prefix;
+                $sql .= "timefromto WHERE user_id=? AND ";
+                $sql .= "dateofday=? ORDER BY timefrom";
+		if ( $stmt->prepare($sql) ) {
 			$stmt->bind_param("is", $userid, $buildDate);
 			$stmt->execute();
 			$stmt->bind_result($fr, $to);
@@ -96,19 +101,15 @@ class Helper {
 				$times['to'][] = substr($to,0,5);
 			}
 			
-			
 			$stmt->close();
-			
-			return $times;
-			
-		}
-		
-		else {
-			return NULL;
+                        return $times;
+		} else {
+                        return NULL;
 		}
 	}
 	
-	//! This member returns all workfields, their corresponding id and the time done (if any)
+        //! This member returns all workfields, their corresponding id and
+        //! the time done (if any)
 	
 	/**
 	 * @param $userid int ID of user
@@ -116,21 +117,28 @@ class Helper {
 	 * @param $month Month of date
 	 * @param $year Year of date
 	 * 
-	 * @return array: Array with workfields, ids, and time - if no data is found NULL is returned
+         * @return array: Array with workfields, ids, and time - if no
+         *                data is found NULL is returned
 	 */
 	public function getWork($userid, $day, $month, $year) {
-		$work = array();
-		$work['dbid'] = array();
-		$work['fieldname'] = array();
-		$work['done'] = array();
-		$buildDate = $year . "-" . $month . "-" . $day;
-		
-		$sql = "SELECT A.description, A.id, B.hours FROM " . CConfig::$db_tbl_prefix  . "workfields AS A LEFT JOIN " . CConfig::$db_tbl_prefix  . "workday AS B ON A.id = B.workfield_id WHERE A.user=? AND B.date=? ORDER BY A.rank";
-		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $work = array();
+                $work['dbid'] = array();
+                $work['fieldname'] = array();
+                $work['done'] = array();
+                $buildDate = $year . "-" . $month . "-" . $day;
+                $sql = "SELECT A.description, A.id, B.hours FROM ";
+                $sql .= CConfig::$db_tbl_prefix;
+                $sql .= "workfields AS A LEFT JOIN ";
+                $sql . CConfig::$db_tbl_prefix;
+                $sql .= "workday AS B ON A.id = B.workfield_id";
+                $sql .= " WHERE A.user=? AND B.date=? ORDER BY A.rank";
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
 		if ( $stmt->prepare($sql) ) {
 			$stmt->bind_param("is", $userid, $buildDate);
 			$stmt->execute();
-			$stmt->bind_result($tempDescription, $tempId, $tempHours);
+                        $stmt->bind_result(
+                                $tempDescription, $tempId, $tempHours);
 			while ( $stmt->fetch() ) {
 				$work['dbid'][] = $tempId;
 				$work['fieldname'][] = $tempDescription;
@@ -138,9 +146,7 @@ class Helper {
 			} 
 			$stmt->close();
 			return $work;
-		}
-		
-		else {
+		} else {
 			return NULL;
 		}
 	}
