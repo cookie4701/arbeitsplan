@@ -159,13 +159,20 @@ class Helper {
 	* @param $month Month of date
 	* @param $year Year of date
 	*
-	* @return array: Array with id of the entry, id of the holliday (day off, normal work day, etc), and hollidaytext (description)
+        * @return array: Array with id of the entry, id of the holliday
+        *                (day off, normal work day, etc), and hollidaytext
+        *                (description)
 	*/
 	
 	public function getHollidayState($userid, $day, $month, $year) {
-		$holliday = array();
+                $holliday = array();
+                $holliday['id'] = -1;
+                $holliday['hollidayid'] = 1;
+                $holliday['hollidaytext'] = ""
 		$buildDate = "$year-$month-$day"; 
-		$sql = "SELECT id, holliday_id, holliday_text FROM " . CConfig::$db_tbl_prefix . "arbeitstage WHERE user_id=? AND dateofday=? LIMIT 0,1";
+                $sql = "SELECT id, holliday_id, holliday_text FROM ";
+                $sql .= CConfig::$db_tbl_prefix;
+                $sql .= "arbeitstage WHERE user_id=? AND dateofday=? LIMIT 0,1";
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 		if ( $stmt->prepare($sql) ) {
 			$stmt->bind_param("is", $userid, $buildDate);
@@ -175,23 +182,10 @@ class Helper {
 				$holliday['id'] = $id;
 				$holliday['hollidayid'] = $hollidayid;
 				$holliday['hollidaytext'] = $hollidaytext;
-			}
-			
-			else {
-				$holliday['id'] = -1;
-				$holliday['hollidayid'] = 1;
-				$holliday['hollidaytext'] = "";
-			}
+			} 
 			
 			$stmt->close();
 		}
-		
-		else {
-			$holliday['id'] = -1;
-			$holliday['hollidayid'] = 1;
-			$holliday['hollidaytext'] = "";
-		}
-		
 		return $holliday;
 	}
 	
@@ -203,7 +197,10 @@ class Helper {
 		$ret = 1;
 		$lastweek = 1;
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-		if ( $stmt->prepare("SELECT week FROM " . CConfig::$db_tbl_prefix . "lastweek WHERE foreignid=?") ) {
+                $sql = "SELECT week FROM " . CConfig::$db_tbl_prefix;
+                $sql .= "lastweek WHERE foreignid=?";
+                
+		if ( $stmt->prepare($sql) ) {
 			$stmt->bind_param("i", $userid);
 			$stmt->execute();
 			$stmt->bind_param("i", $lastweek);
@@ -220,8 +217,7 @@ class Helper {
 		$insupsql = "";
 		
 		try {
-		
-			$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                        $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 			if ($stmt->prepare("SELECT foreignid FROM " . CConfig::$db_tbl_prefix  . "lastweek WHERE foreignid=?")) {
 				$stmt->bind_param("i", $userid);
 				$stmt->execute();
