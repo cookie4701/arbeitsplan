@@ -1,0 +1,24 @@
+.topmenu { 
+	color:black;
+	display:inline;
+	list-style:none;
+	}
+	
+#tbldbusers {
+	border-width: 2px;
+	border-style: solid;
+	border-color: green;
+}
+
+.tbldb {
+	border-width: 2px;
+	border-style: solid;
+}
+
+.workdone {
+	background-color: lightgreen;
+}
+
+.nowork {
+	background-color: #990000;
+}

@@ -1,0 +1,210 @@
+@CHARSET "UTF-8";
+
+BODY {
+	background-color: #FFFFCC;
+	width: 1900px;
+}
+
+INPUT {
+	font-family: Verdana; font-size: 9px;
+}
+
+A:link {text-decoration: none}
+A:visited {text-decoration: none; color: black;}
+A:active {text-decoration: none}
+A:hover {text-decoration: none;}
+
+.general {
+	/*width: 100%;*/
+	/*width: 1900px;*/
+	
+}
+
+.menuentry {
+	border:1px solid #99CCFF; padding-left:10px; padding-right:10px; padding-bottom:10px;
+	width: 150px;
+	list-style-type: none;
+	background-color: #ebe9e6;
+
+}
+
+.menuentry:hover {
+	border:1px solid #99CCFF; padding-left:10px; padding-right:10px; padding-bottom:10px;
+	width: 150px;
+	list-style-type: none;
+	background-color: #b6bdd2;
+	
+}
+
+.kmboxshow {
+	position:absolute;
+	left: 350px;
+	top: 200px;
+}
+
+.reportpartial {
+	position:absolute;
+	left: 350px;
+	top: 200px;
+}
+.passwd {
+	position:absolute;
+	left: 350px;
+	top: 200px;
+}
+
+
+.col1 {
+	clear: right;
+	float: left;
+}
+
+.col2 {
+	clear: right;
+	float: left;
+}
+
+.col3 {
+	clear: right;
+	float: left;
+	min-height: 100px ;
+}
+
+.col4 {
+	padding: 2px;
+	float: left;
+	clear: right;
+}
+
+.col5 {
+	float: left;
+	clear: right;
+}
+
+
+
+.comment {
+	min-height: 200px;
+	min-width: 150px;
+	font-size: small;
+}
+
+.inputtime {
+	width: 1cm;
+}
+
+.descriptionWorkhours {
+	font-size: small;
+}
+
+.day {
+	border-style: solid;
+	border-width: 1px;
+	padding: 4px;
+	height: auto;
+	float: left;
+
+	/*
+	display:grid;
+	grid-gap: 4px;
+	grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	grid-template-rows: repeat(auto-fit, minmax(100px, 1fr));
+
+	 */
+}
+
+.sep {
+	clear: both;
+	height: 4px;
+}
+
+.repday {
+	border-style: solid;
+	border-width: 2px;
+	padding: 0px;
+	/*width: 19cm;*/
+	font-size: small;
+	cellspacing: 0px;
+	cellpadding: 0px;
+}
+
+.reprow {
+	border-bottom-style: solid;
+	border-bottom-width: 2px;
+	padding: 0px;
+	cellspacing: 0px;
+	cellpadding: 0px;
+}
+
+.reprow2 {
+	border-bottom-style: solid;
+	border-bottom-width: 2px;
+	width: 3cm;
+	spacing: 0px;
+	cellspacing: 0px;
+	cellpadding: 0px;
+	border-right-width: 1px;
+	border-right-style: solid;
+}
+
+.reprowWa {
+	border-bottom-style: solid;
+	border-bottom-width: 2px;
+	width: 6cm;
+	spacing: 0px;
+	cellspacing: 0px;
+	cellpadding: 0px;
+	border-right-width: 1px;
+	border-right-style: solid;
+}
+
+.daydate {
+	font-size:small;
+	background-color: lightgreen;
+}
+
+.loginform {
+	background-color: white;
+	position: absolute;
+	top: 100px;
+	left: 300px;
+}
+
+.weeklist {
+	display: inline;
+	list-style-type: none;
+}
+
+.weekli {
+	display: inline;
+	font-size: small;
+}
+
+.weeks {
+	margin: 0px;
+}
+
+.workarealabel {
+	font-size: small;
+	text-align: right;
+}
+
+.descriptionWorkareaOk {
+	background-color: #ffffff;
+}
+
+.descriptionWorkareaNotOk {
+	background-color: #ff0000;
+}
+
+.arbeitszeitendiv {
+	float: left;
+}
+
+.benutzerangabendiv {
+	float: left;
+}
+
+.arbeitsbereichediv {
+	clear: left;
+}
