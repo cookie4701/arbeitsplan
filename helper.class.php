@@ -63,8 +63,7 @@ class Helper {
 	//! Get number of workareas
 	
 	public function getNumberWorkareas() {
-                $max_rank_workfields = CConfig::$max_rank_workfields;
-		return $max_rank_workfields;
+                return CConfig::$max_rank_workfields;
 	}
 	
 	
