@@ -143,7 +143,7 @@ class Helper {
 				$work['fieldname'][] = $tempDescription;
 				$work['done'][] = $tempHours;
 			} 
-			$stmt->close();
+                        $stmt->close();
 			return $work;
 		} else {
 			return NULL;
@@ -167,7 +167,7 @@ class Helper {
                 $holliday = array();
                 $holliday['id'] = -1;
                 $holliday['hollidayid'] = 1;
-                $holliday['hollidaytext'] = ""
+                $holliday['hollidaytext'] = "";
 		$buildDate = "$year-$month-$day"; 
                 $sql = "SELECT id, holliday_id, holliday_text FROM ";
                 $sql .= CConfig::$db_tbl_prefix;
@@ -284,6 +284,53 @@ class Helper {
         }
     }
 
+        function restapi_schedule_create($userid, $data) {
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "INSERT userid, startdate, enddate, label INTO aplan2_schedules";
+                if ($stmt->prepare($sql) ) {
+                        $arrData = json_decode($data);
+                        $startdate = $arrData->startdate;
+                        $enddate = $arrData->enddate;
+                        $label = $arrData->label;
+                        if ($stmt->bind_param("isss", $userid, $startdate, $enddate, $label) && $stmt->execute() ) {
+                                $msg = "ok";
+                        } else {
+                                $msg = "not ok";
+                        }
+                }
+
+                $stmt->close();
+
+                return $msg;
+
+        }
+
+        function restapi_schedule_read($userid) {
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "SELECT idSchedule, startdate, enddate, label FROM aplan2_schedules WHERE userid=?";
+                $schedules = array();
+
+                if ($stmt->prepare($sql) ) {
+                        if ($stmt->bind_param("i", $userid) && $stmt->execute() ) {
+                                $stmt->bind_result($idSchedule, $startdate, $enddate, $label);
+                                while ($stmt->fetch() ) {
+                                        $item = array(
+                                                "idSchedule" => $id,
+                                                "startdate" => $startdate,
+                                                "enddate" => $enddate,
+                                                "label" => $label
+                                        );
+                                        $schedules[] = $item;
+                                }
+                        }
+
+                        $stmt->close();
+                }
+
+                return $schedules;
+
+        }
+
 
 	
 	/**
@@ -349,52 +396,52 @@ class Helper {
 
 		//@TODO: TEST+DEBUG-IF-NEEDED: change the following code in a way that it uses schedules and schedule_items
 
-        // Load all schedules that are in the desired range (startdate / enddate)
-        $tblWorkToDoPerDay = array();
-        $tmpDate = $dbStartDate = date("Y-m-d", $startDate);
-        $dbEndDate = date("Y-m-d", $endDate);
-        $index = 0;
-        while ($tmpDate <= $dbEndDate) {
-            $tblWorkToDoPerDay[] = array();
-            $tblWorkToDoPerDay[$index]['date'] = $tmpDate;
-            $tblWorkToDoPerDay[$index]['timesSchedule'] = array();
-            $tblWorkToDoPerDay[$index]['workday'] = $this->calcDayOfWeek($tmpDate);
+                // Load all schedules that are in the desired range (startdate / enddate)
+                $tblWorkToDoPerDay = array();
+                $tmpDate = $dbStartDate = date("Y-m-d", $startDate);
+                $dbEndDate = date("Y-m-d", $endDate);
+                $index = 0;
+                while ($tmpDate <= $dbEndDate) {
+                    $tblWorkToDoPerDay[] = array();
+                    $tblWorkToDoPerDay[$index]['date'] = $tmpDate;
+                    $tblWorkToDoPerDay[$index]['timesSchedule'] = array();
+                    $tblWorkToDoPerDay[$index]['workday'] = $this->calcDayOfWeek($tmpDate);
 
-            $tmpDate = mktime(0,0,0, date("m", $tmpDate), date("d", $tmpDate)+1, date("Y", $tmpDate) );
-            $index += 1;
-        }
+                    $tmpDate = mktime(0,0,0, date("m", $tmpDate), date("d", $tmpDate)+1, date("Y", $tmpDate) );
+                    $index += 1;
+                }
 
-        $sql = "SELECT time_from, time_to ";
-        $sql .= "FROM " . CConfig::$db_tbl_prefix  . "schedules AS A ";
-        $sql .= "LEFT JOIN " . CConfig::$db_tbl_prefix  . "schedule_items AS B ";
-        $sql .= "ON A.idSchedule = B.idSchedule ";
-        $sql .= "WHERE A.userid=? AND A.startdate <= ? AND A.enddate >= ? AND B.dayOfWeek= ? ";
+                $sql = "SELECT time_from, time_to ";
+                $sql .= "FROM " . CConfig::$db_tbl_prefix  . "schedules AS A ";
+                $sql .= "LEFT JOIN " . CConfig::$db_tbl_prefix  . "schedule_items AS B ";
+                $sql .= "ON A.idSchedule = B.idSchedule ";
+                $sql .= "WHERE A.userid=? AND A.startdate <= ? AND A.enddate > ? AND B.dayOfWeek= ? ";
 
-        if ($stmt->prepare() ) {
-            if ($stmt->bind_param("issi", $user, $pWorkToDoPerDayDate, $pWorkToDoPerDayDate, $pWorkday ) ) {
-                for ($i = 0; $i < count($tblWorkToDoPerDay) ; $i++ ) {
-                    $pWorkday = $tblWorkToDoPerDay[$i]['workday'];
-                    $pWorkToDoPerDayDate = $tblWorkToDoPerDay[$i]['date'];
-                    if ($stmt->execute()) {
-                        $stmt->bind_result($from, $to);
-                        $nbrTimes = 0;
-                        $minutes = 0;
-                        while ($stmt->fetch() ) {
-                            $tblWorkToDoPerDay[$index]['timesSchedule'][]= array();
-                            $tblWorkToDoPerDay[$index]['timesSchedule'][$nbrTimes] ['from'] = $from;
-                            $tblWorkToDoPerDay[$index]['timesSchedule'][$nbrTimes] ['to'] = $to;
-                            $minutes += $this->TimeToInt($to);
-                            $minutes -= $this->TimeToInt($from);
-                            $nbrTimes += 1;
+                if ($stmt->prepare() ) {
+                    if ($stmt->bind_param("issi", $user, $pWorkToDoPerDayDate, $pWorkToDoPerDayDate, $pWorkday ) ) {
+                        for ($i = 0; $i < count($tblWorkToDoPerDay) ; $i++ ) {
+                            $pWorkday = $tblWorkToDoPerDay[$i]['workday'];
+                            $pWorkToDoPerDayDate = $tblWorkToDoPerDay[$i]['date'];
+                            if ($stmt->execute()) {
+                                $stmt->bind_result($from, $to);
+                                $nbrTimes = 0;
+                                $minutes = 0;
+                                while ($stmt->fetch() ) {
+                                    $tblWorkToDoPerDay[$index]['timesSchedule'][]= array();
+                                    $tblWorkToDoPerDay[$index]['timesSchedule'][$nbrTimes] ['from'] = $from;
+                                    $tblWorkToDoPerDay[$index]['timesSchedule'][$nbrTimes] ['to'] = $to;
+                                    $minutes += $this->TimeToInt($to);
+                                    $minutes -= $this->TimeToInt($from);
+                                    $nbrTimes += 1;
+                                }
+                                $tblWorkToDoPerDay[$index]['timeToDoMinutes'] = $minutes;
+                            }
                         }
-                        $tblWorkToDoPerDay[$index]['timeToDoMinutes'] = $minutes;
+                        $stmt->close();
                     }
                 }
-                $stmt->close();
-            }
-        }
 
-        //@TODO: DEBUG+TEST change the following code in a way that id modifies directly the table generated above
+                //@TODO: DEBUG+TEST change the following code in a way that id modifies directly the table generated above
 		// Table with hollidays and days-off taken
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 		if ( $stmt->prepare("SELECT dateofday FROM " . CConfig::$db_tbl_prefix  . "arbeitstage WHERE user_id = ? AND dateofday >= ? AND dateofday < ? AND holliday_id != 1 ") ) {
