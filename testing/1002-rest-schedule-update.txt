@@ -1,0 +1,6 @@
+{
+        "idSchedule" : "1",
+        "startdate" : "2019-01-01",
+        "enddate" : "2019-03-30",
+        "label" : "Testeintrag Update"
+}

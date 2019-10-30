@@ -282,11 +282,81 @@ class Helper {
             $stmt->close();
             return false;
         }
-    }
+        }
+
+
+        function restapi_schedule_delete($userid, $data) {
+
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "DELETE FROM aplan2_schedules WHERE  ";
+                $sql .= "userid = ? AND idSchedule = ?";
+                $msg = "not ok";
+
+                if ( get_class($stmt) !== "mysqli_stmt" ) {
+                        $msg = "not a mysqli_stmt";
+                        return $msg;
+                }
+
+                if ($stmt->prepare($sql) ) {
+                        $arrData = json_decode($data);
+                        $idSchedule = $arrData->idSchedule;
+
+                        if ($stmt->bind_param("ii", $userid, $idSchedule) && $stmt->execute() ) {
+                                $msg = "ok";
+                        } else {
+                                $msg = "not ok " . $stmt->error;
+                        } 
+                        $stmt->close();
+                } else {
+                        $msg = "prepare failed " . $stmt->error;
+                }
+
+                return $msg;
+        }
+
+        function restapi_schedule_update($userid, $data) {
+
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "UPDATE aplan2_schedules SET startdate = ?, enddate = ? , label = ? WHERE  ";
+                $sql .= "userid = ? AND idSchedule = ?";
+                $msg = "not ok";
+
+                if ( get_class($stmt) !== "mysqli_stmt" ) {
+                        $msg = "not a mysqli_stmt";
+                        return $msg;
+                }
+
+                if ($stmt->prepare($sql) ) {
+                        $arrData = json_decode($data);
+                        $startdate = $arrData->startdate;
+                        $enddate = $arrData->enddate;
+                        $label = $arrData->label;
+                        $idSchedule = $arrData->idSchedule;
+
+                        if ($stmt->bind_param("sssii", $startdate, $enddate, $label, $userid, $idSchedule) && $stmt->execute() ) {
+                                $msg = "ok";
+                        } else {
+                                $msg = "not ok " . $stmt->error;
+                        } 
+                        $stmt->close();
+                } else {
+                        $msg = "prepare failed " . $stmt->error;
+                }
+
+                return $msg;
+        }
 
         function restapi_schedule_create($userid, $data) {
                 $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-                $sql = "INSERT userid, startdate, enddate, label INTO aplan2_schedules";
+                $sql = "INSERT INTO aplan2_schedules (userid, startdate, enddate, label) ";
+                $sql .= "VALUES (?, ?, ?, ?)";
+                $msg = "not ok";
+
+                if ( get_class($stmt) !== "mysqli_stmt" ) {
+                        $msg = "not a mysqli_stmt";
+                        return $msg;
+                }
+
                 if ($stmt->prepare($sql) ) {
                         $arrData = json_decode($data);
                         $startdate = $arrData->startdate;
@@ -295,11 +365,12 @@ class Helper {
                         if ($stmt->bind_param("isss", $userid, $startdate, $enddate, $label) && $stmt->execute() ) {
                                 $msg = "ok";
                         } else {
-                                $msg = "not ok";
-                        }
+                                $msg = "not ok " . $stmt->error;
+                        } 
+                        $stmt->close();
+                } else {
+                        $msg = "prepare failed " . $stmt->error;
                 }
-
-                $stmt->close();
 
                 return $msg;
 
@@ -315,7 +386,7 @@ class Helper {
                                 $stmt->bind_result($idSchedule, $startdate, $enddate, $label);
                                 while ($stmt->fetch() ) {
                                         $item = array(
-                                                "idSchedule" => $id,
+                                                "idSchedule" => $idSchedule,
                                                 "startdate" => $startdate,
                                                 "enddate" => $enddate,
                                                 "label" => $label
@@ -1717,7 +1788,7 @@ class Helper {
 	
 	
 	function TransformUserToId($username) {
-		include_once('includes/db_connect.php');
+		include_once(__DIR__ . "/includes/db_connect.php");
 
 		//$db_conn = mysql_connect($dbserver, $dbuser, $dbpass);
 	
@@ -1725,10 +1796,10 @@ class Helper {
 			die("Keine Verbindung zur Datenbank m&ouml;glich");
 		}
 	
-		$db->query("USE $dbname");
+		$db->query("USE " . CConfig::$dbname);
 	
 		//$sqlSelect = "SELECT * FROM " . CConfig::$db_tbl_prefix . "users WHERE uname LIKE '" . $username . "' LIMIT 1";
-		$sqlSelect = "SELECT id FROM " . CConfig::$db_tbl_prefix . "users WHERE uname LIKE '?' LIMIT 1";
+		$sqlSelect = "SELECT id FROM " . CConfig::$db_tbl_prefix . "users WHERE uname LIKE ? LIMIT 1";
 		$stmt = $db->stmt_init();
 
 		if ( ! isset($stmt) ) {
