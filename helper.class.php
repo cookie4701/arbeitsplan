@@ -284,6 +284,51 @@ class Helper {
         }
         }
 
+        function isRessourceMysqliStatement($res) {
+                if ( get_class($res) !== "mysqli_stmt" ) {
+                        return false;
+                } else {
+                        return true;
+                }
+        }
+
+        function restapi_scheduleitems_create($userid, $data) {
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "INSERT INTO aplan2_schedule_items ";
+                $sql .= "(idSchedule, dayOfWeek, time_from, time_to) VALUES ";
+                $sql .= "(?, ?, ?, ?)";
+                $msg = "not ok";
+
+                if ( ! isRessourceMysqliStatement($stmt) ) return $msg;
+
+                $arrData = json_decode($data);
+
+                if ($stmt->prepare($sql) ) {
+                        $idSchedule = -1;
+                        $dayOfWeek = 0;
+                        $time_from = "07:00";
+                        $time_to = "12:00";
+
+                        if (! $stmt->bind_param("iiss", $idSchedule, $dayOfWeek, $time_from, $time_to) ) return $msg;
+
+                        for ($i = 0; $i < count($arrData); $i++ ) {
+                                $idSchedule = $arrData[$i]->idSchedule;
+                                $dayOfWeek = $arrData[$i]->dayOfWeek;
+                                $time_from = $arrData[$i]->timeFrom;
+                                $time_to = $arrData[$i]->timeTo;
+
+                                if (! $stmt->execute() ) return $msg;
+
+                        }
+
+                        $stmt->close();
+                        $msg = "ok";
+                }
+
+
+                return $msg;
+        }
+
 
         function restapi_schedule_delete($userid, $data) {
 
