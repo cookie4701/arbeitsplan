@@ -1,0 +1,26 @@
+{"scheduleitems": [
+        {
+                "idSchedule" : "100",
+                "dayOfWeek" : "0",
+                "timeFrom" : "08:30",
+                "timeTo" : "12:00"
+        },
+        {
+                "idSchedule" : "100",
+                "dayOfWeek" : "0",
+                "timeFrom" : "12:30",
+                "timeTo" : "17:00"
+        },
+        {
+                "idSchedule" : "100",
+                "dayOfWeek" : "1",
+                "timeFrom" : "08:30",
+                "timeTo" : "12:00"
+        },
+        {
+                "idSchedule" : "100",
+                "dayOfWeek" : "1",
+                "timeFrom" : "12:30",
+                "timeTo" : "17:00"
+        }
+]}

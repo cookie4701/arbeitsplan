@@ -299,7 +299,7 @@ class Helper {
                 $sql .= "(?, ?, ?, ?)";
                 $msg = "not ok";
 
-                if ( ! isRessourceMysqliStatement($stmt) ) return $msg;
+                if ( ! $this->isRessourceMysqliStatement($stmt) ) return $msg;
 
                 $arrData = json_decode($data);
 
@@ -311,11 +311,11 @@ class Helper {
 
                         if (! $stmt->bind_param("iiss", $idSchedule, $dayOfWeek, $time_from, $time_to) ) return $msg;
 
-                        for ($i = 0; $i < count($arrData); $i++ ) {
-                                $idSchedule = $arrData[$i]->idSchedule;
-                                $dayOfWeek = $arrData[$i]->dayOfWeek;
-                                $time_from = $arrData[$i]->timeFrom;
-                                $time_to = $arrData[$i]->timeTo;
+                        for ($i = 0; $i < count($arrData->scheduleitems); $i++ ) {
+                                $idSchedule = $arrData->scheduleitems[$i]->idSchedule;
+                                $dayOfWeek = $arrData->scheduleitems[$i]->dayOfWeek;
+                                $time_from = $arrData->scheduleitems[$i]->timeFrom;
+                                $time_to = $arrData->scheduleitems[$i]->timeTo;
 
                                 if (! $stmt->execute() ) return $msg;
 
