@@ -20,8 +20,8 @@
 <link href="default.css" rel="stylesheet" type="text/css">
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="javascripts/userinfo-vue.js"></script>
 <script type="text/javascript">
+
 
 function zaehlearbeitsbereiche() {
 	var std = 0;
@@ -171,7 +171,7 @@ $feiertage = $userinfo[8];
 ?>
 
 
-<form action="userinfo.php" method="get" name="uinfo" onsubmit="return chkBox();" >
+<xxxform action="userinfo.php" method="get" name="uinfo" onsubmit="return chkBox();" >
 <div class="benutzerangabendiv">
  <h2 class="benutzerangaben"> Benutzerangaben </h2>
 
@@ -257,6 +257,8 @@ $feiertage = $userinfo[8];
 
 </div>
 
+<div id="vueapp"> </div>
+
 
 <div class="arbeitsbereichediv">
 <h2 class="benutzerangaben"> Arbeitsbereiche </h2>
@@ -301,10 +303,12 @@ for ( $i = 0; $i < $max_rank_workfields; $i++ ) {
 </form>
 
 <script type="text/javascript">
-	zaehlearbeitsbereiche();
+zaehlearbeitsbereiche();
+
 </script>
 
 
+<script src="javascripts/userinfo-vue.js"></script>
 
 </body>
 

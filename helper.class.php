@@ -292,6 +292,91 @@ class Helper {
                 }
         }
 
+        function restapi_scheduleitems_delete($userid, $data) {
+                $arrData = json_decode($data);
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "DELETE FROM aplan2_schedule_items WHERE idScheduleItem = ?";
+                $idScheduleItem = $arrData->idScheduleItem;
+                
+                if ( 
+                        $stmt->prepare($sql) &&
+                        $stmt->bind_param("i", $idScheduleItem) &&
+                        $stmt->execute() &&
+                        $stmt->close()
+                ) { 
+                        return "ok";
+                } else {
+                        return "not ok";
+                }
+        }
+
+        function restapi_scheduleitems_update($userid, $data) {
+                // to be removed:
+                print_r($_REQUEST);
+                echo $_SERVER["REQUEST_METHOD"];
+
+
+                $arrData = json_decode($data);
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "UPDATE aplan2_schedule_items SET dayofWeek=?, time_from=?, time_to=? WHERE idScheduleItem = ?";
+                $idScheduleItem = $arrData->idScheduleItem;
+                $time_from = $arrData->timeFrom;
+                $time_to = $arrData->timeTo;
+                $dayOfWeek = $arrData->dayOfWeek;
+
+                if ( 
+                        $stmt->prepare($sql) &&
+                        $stmt->bind_param("issi", $dayOfWeek, $time_from, $time_to, $idScheduleItem) &&
+                        $stmt->execute() && 
+                        $stmt->close()
+                ) { 
+                        return "ok";
+                } else {
+                        return "not ok";
+                }
+        }
+
+        function restapi_scheduleitems_read($userid, $data) {
+
+
+                $arrData = json_decode($data);
+                if ( ! isset($arrData->idSchedule) ) {
+                        return "need idSchedule set in json";
+                }
+
+                $idSchedule = $arrData->idSchedule;
+
+                $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+                $sql = "SELECT idScheduleItem, dayOfWeek, time_from, time_to FROM aplan2_schedule_items ";
+                $sql .= "WHERE idSchedule=? ";
+                $sql .= "ORDER BY dayOfWeek";
+                
+                if ($stmt->prepare($sql) &&
+                        $stmt->bind_param("i", $idSchedule ) && 
+                        $stmt->execute() &&
+                        $stmt->bind_result($idScheduleItem, $dayOfWeek, $timeFrom, $timeTo) ) {
+                        $arrScheduleItems = array();
+
+                        while ($stmt->fetch() ) {
+                                $item = array(
+                                        "idScheduleItem" => $idScheduleItem,
+                                        "dayOfWeek" => $dayOfWeek,
+                                        "time_from" => $timeFrom,
+                                        "time_to" => $timeTo
+                                );
+
+                                $arrScheduleItems[] = $item;
+                        }
+
+                        $stmt->close();
+                        return $arrScheduleItems;
+                        
+                }
+
+                return "not ok";
+
+        }
+
         function restapi_scheduleitems_create($userid, $data) {
                 $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
                 $sql = "INSERT INTO aplan2_schedule_items ";
