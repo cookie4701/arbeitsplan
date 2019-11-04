@@ -338,7 +338,6 @@ class Helper {
 
         function restapi_scheduleitems_read($userid, $data) {
 
-
                 $arrData = json_decode($data);
                 if ( ! isset($arrData->idSchedule) ) {
                         return "need idSchedule set in json";
