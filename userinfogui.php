@@ -296,6 +296,20 @@ for ( $i = 0; $i < $max_rank_workfields; $i++ ) {
 
 </table>
 
+<template id="schedule-item-add">
+    <div class="schedule-item-add">
+        Tag: 
+        <select v-model="scheduleItem.workday">
+            <option value="0">Montag</option>
+            <option value="1">Dienstag</option>
+            <option value="2">Mittwoch</option>
+            <option value="3">Donnerstag</option>
+            <option value="4">Freitag</option>
+            <option value="5">Samstag</option>
+            <option value="6">Sonntag</option>
+        </select> Von <input v-model="scheduleItem.from" type="text"> Bis <input type="text" v-model="scheduleItem.to"> <button v-on:"$emit('buttonAddScheduleItem', scheduleItem)">Hinzufügen</button>
+    </div>
+</template>
 
 
 <input class="gruenbox" type="submit" value="Speichern" />

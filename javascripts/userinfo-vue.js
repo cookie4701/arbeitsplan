@@ -1,4 +1,4 @@
-const server = 'http://localhost:8080/rest/';
+const server = document.location.protocol + 'rest/'; // + '://' + document.location.host; // 'http://localhost:8080/rest/';
 
 Vue.component('userinfo', {
         props : [ 
@@ -40,6 +40,11 @@ Vue.component('schedule-item-list', {
                         </ul>
                 </div>
                 `
+});
+
+Vue.component('schedule-item-add', {
+    props : [ 'scheduleItem' ],
+    template: '#schedule-item-add'
 });
 
 Vue.component('new-schedule', {
@@ -111,7 +116,8 @@ const app = new Vue({
           newschedule: null,
           editschedule : null,
           schedules : [],
-          scheduleItems : []
+          scheduleItems : [],
+          scheduleItemAdd : { workday : 0, from : '00:00', to : '00:00' }
   },
 
   methods: {
@@ -265,6 +271,10 @@ const app = new Vue({
                                 :scheduleitems="scheduleItems" >
 
                         </schedule-item-list>
+
+                        <schedule-item-add v-bind:scheduleItem="scheduleItemAdd">
+
+                        </schedule-item-add>
                 </div>
                 </div>
                 `
