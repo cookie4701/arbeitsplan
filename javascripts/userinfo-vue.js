@@ -32,12 +32,45 @@ Vue.component('schedule-item-list', {
                 }
         },
 
+        methods: {
+                        getStringDayOfWeek(nbr) {
+                                if (nbr === 0) {
+                                        return "Montag";
+                                } else if (nbr === 1) {
+                                        return "Dienstag";
+                                } else if ( nbr === 2 ) {
+                                        return "Mittwoch";
+                                } else if ( nbr === 3 ) {
+                                        return "Donnerstag";
+                                } else if ( nbr === 4 ) {
+                                        return "Freitag";
+                                } else if ( nbr === 5 ) {
+                                        return "Samstag";
+                                } else if ( nbr === 6 ) {
+                                        return "Sonntag";
+                                } else {
+                                        return "...";
+                                }
+                        }
+        },
+
         template : `
                 <div class="schedule-item-list">
                 <h3>Stundenplan</h3>
-                        <ul>
-                                <li v-for="itm in scheduleitems">{{itm.idScheduleItem}} </li>
-                        </ul>
+                <table>
+                        <tr>
+                                <td> </td>
+                                <td>Tag</td>
+                                <td>Von</td>
+                                <td>Bis</td>
+                        </tr>
+                        <tr v-for="itm in scheduleitems">
+                                <td><button v-on:click="$emit('buttonRemoveScheduleItem', itm.idScheduleItem);">X</button></td>
+                                <td>{{getStringDayOfWeek(itm.dayOfWeek)}}</td>
+                                <td>{{itm.time_from}}</td>
+                                <td>{{itm.time_to}}</td>
+                        </tr>
+                </table>
                 </div>
                 `
 });
@@ -117,10 +150,18 @@ const app = new Vue({
           editschedule : null,
           schedules : [],
           scheduleItems : [],
-          scheduleItemAdd : { workday : 0, from : '00:00', to : '00:00' }
+          scheduleItemAdd : null 
   },
 
   methods: {
+        resetScheduleItemAdd() {
+                if ( this.editschedule === null) {
+                        this.scheduleItemAdd = { idSchedule: 0, workday: 0, from : '00:00', to : '00:00' };
+                } else {
+                        this.scheduleItemAdd = { idSchedule : this.editschedule, workday : 0, from: '00:00', to : '00:00' };
+                }
+        },
+
         updateSchedule(schedule) {
                 fetch(server + 'schedule/update.php', {body: JSON.stringify(schedule), method : "PUT", headers : { "Content-Type" : "application/json" }})
                         .then( () => {
@@ -167,11 +208,45 @@ const app = new Vue({
       compEditSchedule(scheduleid) {
               this.editschedule = scheduleid;
               this.fetchScheduleItems(scheduleid);
+              this.resetScheduleItemAdd();
+      },
+
+      createScheduleItem(scheduleitem) {
+        fetch(server + 'schedule_items/create.php', {
+                body : JSON.stringify(scheduleitem),
+                method : "POST",
+                headers : {
+                        "Content-Type" : "application/json"
+                }
+        })
+              .then( (response) => {
+                      if ( response === "not ok" ) throw "Unable to save new entry";
+
+                      return response;
+              })
+              .then( (response) => {
+                      console.log('dataset created');
+                      if ( this.editschedule !== null ) {
+                              return response;
+                      } else {
+                              console.log('idSchedule is null');
+                      }
+              })
+
+
+              .catch( (err) => {
+                      console.log('error!');
+              });
+              
+              this.fetchScheduleItems(this.editschedule);
+
       },
 
       fetchScheduleItems(idSchedule) {
         this.scheduleItems = null;
         var param = { "idSchedule" : idSchedule };
+        console.log('fetch with: ' + JSON.stringify(param) );
+
         fetch(server + 'schedule_items/read.php', { 
                 body : JSON.stringify(param), 
                 method : "POST",
@@ -194,6 +269,8 @@ const app = new Vue({
 
               .then( (data) => {
                       this.scheduleItems = data;
+                      this.resetScheduleItemAdd();
+                      return true;
               })
 
               .catch( (err) => {
@@ -216,6 +293,7 @@ const app = new Vue({
                 .then(response => response.json() )
                 .then( (data) => {
                         this.schedules = data;
+                        return true;
                 })
                 .catch( (data) => {
                     console.log(data);
@@ -243,12 +321,42 @@ const app = new Vue({
               console.log(data);
           });
 
-    }
+    },
+        compScheduleItemListRemoveElement(idScheduleItem) {
+                var param = { "idScheduleItem" : idScheduleItem };
+                fetch(server + 'schedule_items/delete.php', {
+                        body : JSON.stringify(param),
+                        method : "POST",
+                        headers : {
+                                "Content-Type" : "application/json"
+                        }
+                })
+                        .then ( (response => response.text() ) )
+                        .then( (response) => {
+                                if ( response === 'ok' ) {
+                                        return response;
+                                } else {
+                                        throw 'Unable to delete';
+                                }
+                        })
+
+                        .then( () => {
+                                this.fetchScheduleItems(this.editschedule);
+                                return true;
+                        })
+
+                        .catch( (err) => {
+                                console.log(err);
+                        });
+                        
+                       
+        }
   },
 
   mounted() {
       this.fetchSchedules();
       this.scheduleItems = null;
+      this.resetScheduleItemAdd();
   },
 
         template: `
@@ -268,11 +376,16 @@ const app = new Vue({
 
                 <div v-if="editschedule">
                         <schedule-item-list
-                                :scheduleitems="scheduleItems" >
+                                :scheduleitems="scheduleItems" 
+                                v-on:buttonRemoveScheduleItem="compScheduleItemListRemoveElement"
+                        >
 
                         </schedule-item-list>
 
-                        <schedule-item-add v-bind:scheduleItem="scheduleItemAdd">
+                        <schedule-item-add 
+                                v-bind:schedule-item="scheduleItemAdd"
+                                v-on:buttonAddScheduleItem="createScheduleItem"
+                        >
 
                         </schedule-item-add>
                 </div>
@@ -281,3 +394,8 @@ const app = new Vue({
 
 });
 
+/*
+ *
+ *
+
+                                */

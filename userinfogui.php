@@ -210,53 +210,6 @@ $feiertage = $userinfo[8];
 
 </div>
 
-<div class="arbeitszeitendiv">
-<h2 class="benutzerangaben"> Arbeitszeiten </h2>
-<table border="0">
- <tr>
-	<td> Wochentag </td>
-	<td> Stunden </td>
-</tr>
-<tr>
-	<td> Montag </td>
-	<td> <input class="gelbbox" name="wochentag1" value="<?php echo str_replace( "." ,  ",", $userworkdays[0][1]); ?>" type="text" size="10" /> </td>
-</tr>
-
-<tr>
-	<td> Dienstag </td>
-	<td> <input class="gelbbox" name="wochentag2" value="<?php echo str_replace( "." ,  ",",  $userworkdays[1][1]); ?>" type="text" size="10" /> </td>
-</tr>
-
-<tr>
-	<td> Mittwoch </td>
-	<td> <input class="gelbbox" name="wochentag3" value="<?php echo str_replace( "." ,  ",",  $userworkdays[2][1]); ?>" type="text" size="10" /> </td>
-</tr>
-
-<tr>
-	<td> Donnerstag </td>
-	<td> <input class="gelbbox" name="wochentag4" type="text" size="10" value="<?php echo str_replace( "." ,  ",",  $userworkdays[3][1]); ?>" /> </td>
-</tr>
-
-<tr>
-	<td> Freitag </td>
-	<td> <input class="gelbbox" name="wochentag5" type="text" size="10" value="<?php echo str_replace( "." ,  ",", $userworkdays[4][1]); ?>" /> </td>
-</tr>
-
-<tr>
-	<td> Samstag </td>
-	<td> <input class="gelbbox" name="wochentag6" type="text" size="10" value="<?php echo str_replace( "." ,  ",", $userworkdays[5][1]); ?>" /> </td>
-</tr>
-
-<tr>
-	<td> Sonntag </td>
-	<td> <input class="gelbbox" name="wochentag7" type="text" size="10" value="<?php echo str_replace( "." ,  ",", $userworkdays[6][1]); ?>" /> </td>
-</tr>
-
-
-</table>
-
-</div>
-
 <div id="vueapp"> </div>
 
 
@@ -307,10 +260,69 @@ for ( $i = 0; $i < $max_rank_workfields; $i++ ) {
             <option value="4">Freitag</option>
             <option value="5">Samstag</option>
             <option value="6">Sonntag</option>
-        </select> Von <input v-model="scheduleItem.from" type="text"> Bis <input type="text" v-model="scheduleItem.to"> <button v-on:"$emit('buttonAddScheduleItem', scheduleItem)">Hinzufügen</button>
+        </select> 
+        Von <input v-model="scheduleItem.from" type="text"> 
+        Bis <input type="text" v-model="scheduleItem.to"> 
+        <button v-on:click="$emit('buttonAddScheduleItem', scheduleItem)" @submit.prevent="action">Hinzufügen</button>
     </div>
 </template>
 
+<template id="userinfo">
+        <div class="userinfo">
+                <label for="displayname"> Name </label> 
+                <input type="text" id="displayname" :userinfo.displayname readonly>
+
+                <label for="drivecompensation"> KM-Satz </label>
+                <input type="text" id="drivecompensation" :userinfo.drivecompensation>
+
+                <label for="startdate"> Startdatum (Berechnung) </label>
+                <input type="text" id="startdate" :userinfo.startdate readonly>
+
+                <label for="lastfinal"> Letzter Stichtag für Überstunden </label>
+                <input type="text" id="lastfinal" :userinfo.lastfinal readonly>
+
+                <label for="lastover"> Übertrag der Überstunden (üblicherweise 0) </label>
+                <input type="text" id="lastover" :userinfo.lastover readonly>
+
+        </div>
+</template>
+
+<template id="holliday">
+        <div class="holliday">
+                <table>
+                        <tr>
+                                <td></td>
+                                <td>Von</td>
+                                <td>Bis</td>
+                                <td>Urlaubstage</td>
+                                <td>Feiertage</td>
+                        </tr>
+                        <tr v-for="period in freedayperiods">
+                                <td><button>X</button> </td>
+                                <td>{{freedayperiod.startdate}}</td>
+                                <td>{{freedayperiod.enddate}}</td>
+                                <td>{{freedayperiod.hollidays}}</td>
+                                <td>{{freedayperiod.vacationdays}}</td>
+                        </tr>
+
+                </table>
+
+                <label for="newfreeperiodStartdate">Startdatum:</label>
+                <input type="text" id="newfreeperiodStartdate" :newFreePeriod.startdate>
+
+                <label for="newfreeperiodEnddate">Enddatum:</label>
+                <input type="text" id="newfreeperiodEnddate" :newFreePeriod.enddate>
+
+                <label for="newfreeperiodHollidays">Urlaubstage:</label>
+                <input type="text" id="newfreeperiodHollidays" :newFreePeriod.hollidays>
+
+                <input for="newfreeperiodVacationdays">Feiertage:</label>
+                <input type="text" id="newfreeperiodVacationdays" :newFreePeriod.vacationdays>
+
+                <button @click="$emit('buttonAddFreePeriod', newFreePeriod)" @submit.prevent="action">Anlegen</button>
+
+        </div>
+</template>
 
 <input class="gruenbox" type="submit" value="Speichern" />
 </div>

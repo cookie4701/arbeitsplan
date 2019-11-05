@@ -296,6 +296,11 @@ class Helper {
                 $arrData = json_decode($data);
                 $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
                 $sql = "DELETE FROM aplan2_schedule_items WHERE idScheduleItem = ?";
+
+                if (! isset($arrData->idScheduleItem) ) {
+                        return "Need id";
+                }
+
                 $idScheduleItem = $arrData->idScheduleItem;
                 
                 if ( 
@@ -348,7 +353,7 @@ class Helper {
                 $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
                 $sql = "SELECT idScheduleItem, dayOfWeek, time_from, time_to FROM aplan2_schedule_items ";
                 $sql .= "WHERE idSchedule=? ";
-                $sql .= "ORDER BY dayOfWeek";
+                $sql .= "ORDER BY dayOfWeek, time_from";
                 
                 if ($stmt->prepare($sql) &&
                         $stmt->bind_param("i", $idSchedule ) && 
@@ -395,13 +400,25 @@ class Helper {
 
                         if (! $stmt->bind_param("iiss", $idSchedule, $dayOfWeek, $time_from, $time_to) ) return $msg;
 
-                        for ($i = 0; $i < count($arrData->scheduleitems); $i++ ) {
-                                $idSchedule = $arrData->scheduleitems[$i]->idSchedule;
-                                $dayOfWeek = $arrData->scheduleitems[$i]->dayOfWeek;
-                                $time_from = $arrData->scheduleitems[$i]->timeFrom;
-                                $time_to = $arrData->scheduleitems[$i]->timeTo;
+                        if ( isset($arrData->idSchedule) && isset($arrData->workday) && isset ($arrData->from) && isset($arrData->to) ) {
+                                $idSchedule = $arrData->idSchedule;
+                                $time_from = $arrData->from;
+                                $time_to = $arrData->to;
+                                $dayOfWeek = $arrData->workday;
 
                                 if (! $stmt->execute() ) return $msg;
+
+                        } else {
+
+                                for ($i = 0; $i < count($arrData->scheduleitems); $i++ ) {
+                                        $idSchedule = $arrData->scheduleitems[$i]->idSchedule;
+                                        $dayOfWeek = $arrData->scheduleitems[$i]->workday;
+                                        $time_from = $arrData->scheduleitems[$i]->from;
+                                        $time_to = $arrData->scheduleitems[$i]->to;
+
+                                        if (! $stmt->execute() ) return $msg;
+
+                                }
 
                         }
 
