@@ -25,10 +25,6 @@ class CLogin {
 	
 	public function __construct()
 	{
-		global $dbuser;
-		global $dbpass;
-		global $dbname;
-		
 		$this->detectLogout();
 		
 		$this->idUser = -1;

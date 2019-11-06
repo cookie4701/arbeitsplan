@@ -1,5 +1,6 @@
 const server = document.location.protocol + 'rest/'; // + '://' + document.location.host; // 'http://localhost:8080/rest/';
 
+
 Vue.component('userinfo', {
         props : [ 
                 'userinfo'
@@ -142,7 +143,10 @@ Vue.component('schedule-list', {
         `
 });
 
+const helper = require('./common.js');
+
 const app = new Vue({
+  mixin: [helper],
   el: '#vueapp',
   data : {
           showNewSchedule: false,
@@ -150,10 +154,23 @@ const app = new Vue({
           editschedule : null,
           schedules : [],
           scheduleItems : [],
-          scheduleItemAdd : null 
+          scheduleItemAdd : null,
+          totalTimeWeek : '00:00'
   },
 
   methods: {
+
+        calcWeekTime() {
+                var worked = 0;
+                for (var i=0; i < this.scheduleItems.length; i++ ) {
+                        worked += this.timeToInt(this.scheduleItems[i].time_to);
+                        worked -= this.timeToint(this.scheduleItems[i].time_from);
+                }
+
+                this.totalTimeWeek = this.intToTime(worked); 
+
+        },
+
         resetScheduleItemAdd() {
                 if ( this.editschedule === null) {
                         this.scheduleItemAdd = { idSchedule: 0, workday: 0, from : '00:00', to : '00:00' };
@@ -233,12 +250,17 @@ const app = new Vue({
                       }
               })
 
+              .then( (resp) => {
+                      this.fetchScheduleItems(this.editschedule);
+                      return true;
+              })
+
 
               .catch( (err) => {
                       console.log('error!');
               });
               
-              this.fetchScheduleItems(this.editschedule);
+              //this.fetchScheduleItems(this.editschedule);
 
       },
 
@@ -270,6 +292,11 @@ const app = new Vue({
               .then( (data) => {
                       this.scheduleItems = data;
                       this.resetScheduleItemAdd();
+                      return true;
+              })
+
+              then ( () => {
+                      this.calcWeekTime();
                       return true;
               })
 
@@ -388,6 +415,8 @@ const app = new Vue({
                         >
 
                         </schedule-item-add>
+
+                        {{totalTimeWeek}}
                 </div>
                 </div>
                 `
@@ -399,3 +428,4 @@ const app = new Vue({
  *
 
                                 */
+
