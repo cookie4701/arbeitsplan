@@ -1,3 +1,5 @@
+use testdb;
+
 CREATE TABLE IF NOT EXISTS aplan2_schedules (
     idSchedule INT NOT NULL AUTO_INCREMENT,
     userid INT NOT NULL,

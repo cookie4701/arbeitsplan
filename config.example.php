@@ -13,7 +13,8 @@ class CConfig {
 	public static $dbhost = "localhost";
 	public static $dbname = "testdb";
 	public static $db_tbl_prefix = "aplan_";
-	public static $max_rank_workfields = 24;
+        public static $max_rank_workfields = 24;
+        public static $jwt_secret = ""; // Must be 12 characters in length, contain upper and lower case letters, a number, and a special character `*&!@%^#$``
 
 	/* Adminpanel options */
 	public static $backupdir = "backup";
