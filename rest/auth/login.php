@@ -54,7 +54,8 @@ if ( $stmt->bind_result($resId, $resUname) ) {
 
                 $payload = [
                         'id' => $resId,
-                        'username' => $resUname
+                        'username' => $resUname,
+                        'exp' => time() + 3600
                 ];
 
                 $secret = 'oobar&123ABC';
