@@ -76,8 +76,10 @@ function isModeratorOf($user, $code) {
 
 }
 
-function moderatesUsers($user, $code) {
+function moderatesUsers($user, $code, $page, $nbritems) {
     $users = array();
+
+    $startoffset = ($page - 1) * $nbritems;
 
     if ( ! isModeratorOf($user, $code)) {
         return $users;
@@ -86,17 +88,17 @@ function moderatesUsers($user, $code) {
     try {
         $db = dbConnection();
         $stmt = $db->stmt_init();
-        $sql = "SELECT A.iduserwatch, B.dname FROM aplan_userwatchlist AS A LEFT JOIN aplan_users AS B ON A.iduserwatch = B.id WHERE orgacode=?";
-        $sql .= " ORDER BY B.dname";
+        $sql = "SELECT A.iduserwatch, B.dname FROM aplan_userwatchlist AS A LEFT JOIN aplan_users AS B ON A.iduserwatch = B.id WHERE orgacode LIKE ?";
+        $sql .= " ORDER BY B.dname LIMIT ?,? ";
         $stmt->prepare($sql);
-        $stmt->bind_param("s", $code);
+        $stmt->bind_param("sii", $code, $startoffset, $nbritems);
         $stmt->execute();
         $stmt->bind_result($id, $uname);
         $index = 0;
         while ($stmt->fetch()) {
             $users[] = array();
             $users[$index]['id'] = $id;
-            $users[$index]['displayname'] = $uname;
+            $users[$index]['displayname'] = utf8_encode($uname);
             $index++;
         }
         $stmt->close();
