@@ -999,6 +999,36 @@ class Helper
         return $reco;
     }
 
+    function restapi_monitor_get_userinfo($userid) {
+      $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+      $sql "SELECT dname FROM aplan2_users WHERE id = ?";
+      $msg = array();
+      if ($stmt->prepare($sql)) {
+          if ($stmt->bind_param("i", $userid) && $stmt->execute()) {
+              $stmt->bind_result($displayname);
+              if ( $stmt->fetch() ) {
+                $msg['displayname'] = $displayname;
+                $msg['id'] = $userid;
+                $msg['status'] = 'found';
+
+
+              } else {
+                $msg['status'] = 'not found';
+
+              }
+              $stmt->close();
+              return $msg;
+          } else {
+              $msg = $stmt->error;
+
+          }
+
+          $stmt->close();
+      }
+
+      return $msg;
+    }
+
     function restapi_workareas_delete($userid, $data)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
@@ -3463,7 +3493,7 @@ class Helper
 
     public function generateKmInvoiceTable($user)
     {
-        $this->dbx->ExecuteSQL("CREATE TABLE IF NOT EXISTS " . CConfig::$db_tbl_prefix . "kminvoiced  ( \n 
+        $this->dbx->ExecuteSQL("CREATE TABLE IF NOT EXISTS " . CConfig::$db_tbl_prefix . "kminvoiced  ( \n
 		id     int(10) unsigned NOT NULL AUTO_INCREMENT, \n
 		userid   int(11) unsigned NOT NULL, \n
 		kmweek int(11) unsigned default NULL, \n
