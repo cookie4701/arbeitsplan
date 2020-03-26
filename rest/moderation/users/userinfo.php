@@ -20,17 +20,17 @@ require_once ("../../member.php");
 
 
 $dataInput = file_get_contents("php://input");
-$dataInput = json_decode($dataInput);
+//$dataInput = json_decode($dataInput);
 
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
-} else if (!isset($dataInput->id) ) {
+} else if (!isset($_GET["id"]) ) {
     header("HTTP/1.1 401 Unauthorized");
 
 } else {
 
-    $singleuserid = $dataInput->id;
+    $singleuserid = $_GET["id"];
     $responseArray = $helper->restapi_monitor_get_userinfo($singleuserid);
 
     if ( ! isset($responseArray["status"]) || $responseArray["status"] != "found" ) {
