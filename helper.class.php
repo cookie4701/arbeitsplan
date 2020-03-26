@@ -1001,7 +1001,7 @@ class Helper
 
     function restapi_monitor_get_userinfo($userid) {
       $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-      $sql "SELECT dname FROM aplan2_users WHERE id = ?";
+      $sql = "SELECT dname FROM aplan2_users WHERE id = ?";
       $msg = array();
       if ($stmt->prepare($sql)) {
           if ($stmt->bind_param("i", $userid) && $stmt->execute()) {
@@ -1016,14 +1016,13 @@ class Helper
                 $msg['status'] = 'not found';
 
               }
-              $stmt->close();
-              return $msg;
           } else {
               $msg = $stmt->error;
-
           }
 
           $stmt->close();
+      } else {
+        $msg["status"] = 'not found';
       }
 
       return $msg;
