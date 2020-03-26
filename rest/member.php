@@ -76,6 +76,36 @@ function isModeratorOf($user, $code) {
 
 }
 
+function moderatesUsersNumber($user, $code) {
+
+    $userCount = array();
+
+    if ( ! isModeratorOf($user, $code)) {
+        return $userCount;
+    }
+
+    try {
+        $db = dbConnection();
+        $stmt = $db->stmt_init();
+        $sql = "SELECT COUNT(A.iduserwatch), B.dname FROM aplan_userwatchlist AS A LEFT JOIN aplan_users AS B ON A.iduserwatch = B.id WHERE orgacode LIKE ?";
+        $sql .= " ORDER BY B.dname";
+        $stmt->prepare($sql);
+        $stmt->bind_param("s", $code);
+        $stmt->execute();
+        $stmt->bind_result($nbrids, $name);
+        if ($stmt->fetch()) {
+            $userCount['nbr_users'] = $nbrids;
+        } else {
+		$userCount['nbr_users'] = '0';
+	}
+        $stmt->close();
+        return $userCount;
+    } catch (Exception $excp) {
+        echo $excp;
+    }
+
+}
+
 function moderatesUsers($user, $code, $page, $nbritems) {
     $users = array();
 
