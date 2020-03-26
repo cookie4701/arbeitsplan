@@ -33,8 +33,9 @@ if ( !isModerator($userid) ) {
     $singleuserid = $_GET["id"];
     $responseArray = $helper->restapi_monitor_get_userinfo($singleuserid);
 
-    if ( ! isset($responseArray["status"]) || $responseArray["status"] != "found" ) {
+    if ( ! isset($responseArray["status"]) || strcmp($responseArray["status"], "found") != 0 ) {
       header("HTTP/1.1 404 NOT FOUND");
+      echo json_encode($responseArray);
     } else {
       header('Content-Type: application/json');
       echo json_encode($responseArray);
