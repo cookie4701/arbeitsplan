@@ -296,6 +296,61 @@ class Helper
         }
     }
 
+	function restapi_moderation_freeze_userinput($arrayData) {
+		$id = $arrayData->moduserid;
+		$qdate = $arrayData->qdate;
+		$response = array();
+
+		$sql = "INSERT INTO aplan_freeze (user, freezedate) VALUES (?,?)";
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("is", $id, $qdate) &&
+			$stmt->execute() &&
+			$stmt->close();
+		) {
+			$response['code'] = 200;
+			$response['message'] = "ok";
+		} else {
+			$response['code'] = 500;
+			$response['message'] = "error";
+		}
+
+		return $response;
+	}
+
+	function restapi_moderation_create_timemodification($data) {
+		$userid = $data->moduserid;
+		$qdate = $this->TransformDateToUs( $data->moddate );
+		$reason = $data->modreason;
+		$time = $this->TimeToInt( $data->modtime);
+		$typemod = $data->modtype;
+		if ( strcmp($typemod, '-') == 0 ) {
+			$time *= -1.0;
+		}
+
+		$response = array();
+
+		$sql = "INSERT INTO aplan_bonus_times (user, bonus_minutes, bonus_date, short_description) VALUES (?, ?, ?, ?)";
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
+		if ($stmt->prepare($sql) && $stmt->bind_param("iiss", $userid, $time, $qdate, $reason) && 
+			$stmt->execute() && $stmt->close() ) {
+			
+			$response['status'] = "ok";
+			$response['code'] = 200;
+		} else {
+			$response['status'] = "not ok";
+			$response['code'] = 500;
+			$response['text'] = mysqli_error($this->dbx->getDatabaseConnection()) .  " userid: $userid";
+		}
+
+		return $response;	
+		
+	}	
+
+		
+
     function restapi_scheduleitems_delete($userid, $data)
     {
         $arrData = json_decode($data);
@@ -1725,7 +1780,7 @@ class Helper
         }
 
         //$dayOfWeek =
-        $sql = "SELECT A.label, B.time_from, B.time_to ";
+        $sql = "SELECT A.label, B.time_from, B.time_to, B.idScheduleItem ";
         $sql .= "FROM aplan2_schedules AS A ";
         $sql .= "INNER JOIN aplan2_schedule_items AS B ON A.idSchedule=B.idSchedule ";
         $sql .= "WHERE userid=? AND startdate <= ? AND enddate >= ? AND dayOfWeek=? ";
@@ -1737,7 +1792,7 @@ class Helper
 
         if (
             $stmt->execute() &&
-            $stmt->bind_result($label, $from, $to)
+            $stmt->bind_result($label, $from, $to, $iditem)
          ) {
             $index = 0;
             while ($stmt->fetch() ) {
@@ -1745,11 +1800,12 @@ class Helper
                 $arrData[$index]['label'] = $label;
                 $arrData[$index]['timeFrom'] = $from;
                 $arrData[$index]['timeTo'] = $to;
+		$arrData[$index]['iditem'] = $iditem;
                 $index++;
             }
 
         }
-
+	
         $stmt->close();
         return $arrData;
 
@@ -1996,6 +2052,7 @@ class Helper
         if (count($arrEnddate) < 3 ) return 0;
 
         $dateTemp = mktime(0,0,0,$arrStartdate[1], $arrStartdate[2], $arrStartdate[0]);
+	$startDate = $dateTemp;
         $dateEnd = mktime(0,0,0, $arrEnddate[1], $arrEnddate[2], $arrEnddate[0]);
 
         // make array from startdate to date, return if array length is zero (returns 0)
@@ -2080,6 +2137,24 @@ class Helper
             }
         }
         $stmt->close();
+
+	// retrieve bonus / subtraction times 
+	$strStartDate = date("Y-m-d", $startDate);
+	$strEndDate = date("Y-m-d", $dateEnd);
+	$sql = "SELECT bonus_minutes FROM aplan_bonus_times WHERE user=? AND bonus_date >= ? AND bonus_date < ?";
+	$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+	if ($stmt->prepare($sql) && 
+		$stmt->bind_param("iss", $user, $strStartDate, $strEndDate) && 
+		$stmt->execute() && $stmt->bind_result($bonus) ) {
+
+		while($stmt->fetch() ) {
+			$result += $bonus;
+		}
+
+		$stmt->close();
+	}
+	
+		
         return $result;
     }
 
