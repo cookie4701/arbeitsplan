@@ -296,6 +296,174 @@ class Helper
         }
     }
 
+	function restapi_delete_workperiod($data) {
+		$id = $data->idPeriod;
+
+		$sql = "DELETE FROM aplan_periods WHERE idPeriod=?";
+	
+		$response = array();	
+		$response['status'] = 500;
+		$response['text'] = "NOT OK";	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("i", $id) &&
+			$stmt->execute() 
+		) {
+			$response['status'] = 200;
+			$response['text'] = "OK";
+			$stmt->close();
+		} else {
+			$response['text'] = $stmt->error;
+		} 
+
+		return $response;
+	}
+
+	function restapi_get_workperiods() {
+
+		$sql = "SELECT idPeriod, period_start, period_end, label FROM aplan_periods";
+		$sql .= " ORDER BY period_start DESC";
+
+		$response = array();	
+		$response['status'] = 500;	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->execute() &&
+			$stmt->bind_result($id, $start, $end, $label)
+		) {
+			$response['status'] = 200;
+			$response['text'] = "OK";
+			$response['periods'] = array();
+			$index = 0; 
+			while ($stmt->fetch() ) {
+				$response['periods'][] = array();
+				$response['periods'][$index] = array();
+				$response['periods'][$index]['id'] = $id;
+				$response['periods'][$index]['start'] = $start;
+				$response['periods'][$index]['end'] = $end;
+				$response['periods'][$index]['label'] = $label;
+				$index++;
+			}
+			$stmt->close();
+		} else {
+			$response['text'] = "Error " . $stmt->error;
+		}
+
+		return $response;
+	}
+
+	function restapi_create_period($formdata) {
+		$label = $formdata->label;
+		$startdate = $formdata->startdate;
+		$enddate = $formdata->enddate;
+
+		$sql = "INSERT INTO aplan_periods (label, period_start, period_end) VALUES (?,?,?)";
+
+		$response = array();	
+		$response['status'] = 500;	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("sss", $label, $startdate, $enddate) &&
+			$stmt->execute() 
+		) {
+			$response['status'] = 200;
+			$stmt->close();
+		} 
+
+		return $response;
+			
+	}
+
+	function restapi_get_rides($params) {
+
+		$userid = $params['userid'];
+		$startdate = $params['sdate'];
+		$enddate = $params['edate'];
+
+		$sql = "SELECT id, day, fromwhere, towhere, km FROM aplan_kilometers";
+		$sql .= " WHERE user_id = ? AND day >= ? AND day <= ?  ";
+		$sql .= " ORDER BY day";
+
+		$response = array();	
+		$response['status'] = 500;	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("iss", $userid, $startdate, $enddate) &&
+			$stmt->execute() &&
+			$stmt->bind_result($id, $day, $from, $to, $km)
+		) {
+			$response['status'] = 200;
+			$response['workareas'] = array();
+			$index = 0;
+			while ($stmt->fetch() ) {
+				$response['rides'][] = array();
+				$response['rides'][$index]['day'] = $day;
+				$response['rides'][$index]['idKm'] = $id;
+				$response['rides'][$index]['from'] = $from;
+				$response['rides'][$index]['to'] = $to;
+				$response['rides'][$index]['km'] = $km;
+				$response['rides'][$index]['rate'] = 0.0;
+				$index++;
+
+			}
+
+			$stmt->close();
+
+		} else {
+			$response['message'] = $this->getDatabaseConnection()->getDatabaseConnection()->error;
+		}
+
+		return $response;
+			
+	}
+
+	function restapi_selfstat_workareas($userid, $sdate, $edate) {
+		$sql = "SELECT B.rank, B.description, A.hours, B.timecapital FROM aplan_workday as A ";
+		$sql .= "LEFT JOIN aplan_workfields AS B ";
+		$sql .= "ON A.workfield_id = B.rank ";
+		$sql .= "WHERE A.user_id = ? AND A.date >= ? AND A.date <= ? AND B.user=? ";
+		$sql .= "AND A.hours > 0 ";
+		$sql .= "ORDER BY B.rank";
+	
+		$response['code'] = 500;	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("issi", $userid, $sdate, $edate, $userid) &&
+			$stmt->execute() &&
+			$stmt->bind_result($rank, $description, $hours, $capital)
+		) {
+			$response['code'] = 200;
+			$response['workareas'] = array();
+		
+			$index = -1;
+
+			$oldrank = -1;	
+			while ($stmt->fetch() ) {
+				if ($oldrank != $rank )   {
+					$index++;
+					$oldrank = $rank;
+					$response['workareas'][$index] = array();
+					$response['workareas'][$index]['description'] = $description;
+					$response['workareas'][$index]['timecapital'] = $capital;
+					$response['workareas'][$index]['times'] = array();
+				}
+				$response['workareas'][$index]['times'][] = $hours;
+			}
+
+			$stmt->close();	
+		} else {
+			$response['message'] = $stmt->error;
+			$stmt->close();
+		}
+
+		return $response;
+	}
+
 	function restapi_moderation_freeze_userinput($arrayData) {
 		$id = $arrayData->moduserid;
 		$qdate = $arrayData->qdate;
@@ -307,7 +475,7 @@ class Helper
 		if ( $stmt->prepare($sql) &&
 			$stmt->bind_param("is", $id, $qdate) &&
 			$stmt->execute() &&
-			$stmt->close();
+			$stmt->close()
 		) {
 			$response['code'] = 200;
 			$response['message'] = "ok";
@@ -1170,7 +1338,6 @@ class Helper
             }
         }
 
-        //@TODO: TEST+DEBUG-IF-NEEDED: change the following code in a way that it uses schedules and schedule_items
 
         // Load all schedules that are in the desired range (startdate / enddate)
         $tblWorkToDoPerDay = array();
@@ -1217,7 +1384,6 @@ class Helper
             }
         }
 
-        //@TODO: DEBUG+TEST change the following code in a way that id modifies directly the table generated above
         // Table with hollidays and days-off taken
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         if ($stmt->prepare("SELECT dateofday FROM " . CConfig::$db_tbl_prefix . "arbeitstage WHERE user_id = ? AND dateofday >= ? AND dateofday < ? AND holliday_id != 1 ")) {
@@ -1255,6 +1421,24 @@ class Helper
 
         $resMinutes = $workDoneMinutes - $workToBeDoneMinutes + $workLastYear;
 
+	// get all bonus times between start and enddate
+    	$dbStartDate = date("Y-m-d", $startDate);
+        $dbEndDate = date("Y-m-d", $endDate);
+	$sql = "SELECT bonus_minutes FROM aplan_bonus_times WHERE user=? AND bonus_date >= ? AND bonus_date <= ?";
+	$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+	if (
+		$stmt->prepare($sql) &&
+		$stmt->bind_param("iss", $use , $dbStartDate, $dbEndDate ) &&
+		$stmt->execute() &&
+		$stmt->bind_result($mins) 
+	) {
+
+		while ($stmt->fetch() ) {
+			$resMinutes += $mins;
+		}
+
+		$stmt->close();
+	 }
         return $resMinutes;
     }
 
@@ -1630,6 +1814,10 @@ class Helper
 
         $dayInfo['schedule'] = $this->getSchedule($id, $date);
 
+	$dayInfo['inputblocked'] = $this->restapi_isBlocked($id, $date);
+
+	$dayInfo['bonus'] = $this->restapi_get_bonus_time($id, $date);
+
         //@test: get from to workhours
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $stmt->prepare("SELECT timefrom, timeto, id FROM " . CConfig::$db_tbl_prefix . "timefromto WHERE user_id=? AND dateofday=? ORDER BY timefrom");
@@ -1757,6 +1945,51 @@ class Helper
         return $dayInfo;
 
     }
+
+	function restapi_get_bonus_time($id, $date) {
+		$bonusTimes = array();
+		$bonusIndex = 0;
+
+		$sql = "SELECT idBonus, bonus_minutes, short_description FROM aplan_bonus_times WHERE user=? AND bonus_date = ?";
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if ( 
+			$stmt->prepare($sql) &&
+			$stmt->bind_param("is", $id, $date) &&
+			$stmt->execute() &&
+			$stmt->bind_result($id, $minutes, $description)
+		) {
+			while ($stmt->fetch() ) {
+				$bonusTimes[] = array();
+				$bonusTimes[$bonusIndex]['id'] = $id;
+				$bonusTimes[$bonusIndex]['minutes'] = $minutes;
+				$bonusTimes[$bonusIndex]['description'] = $description;
+				$bonusIndex++;
+			}
+			$stmt->close();
+			return $bonusTimes;
+
+		} else {
+			return $bonusTimes;
+		}
+	}
+
+	function restapi_isBlocked($id, $date) {
+		$sql = "SELECT idFreeze FROM aplan_freeze WHERE user=? AND freezedate >= ?";
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if ( 
+			$stmt->prepare($sql) &&
+			$stmt->bind_param("is", $id, $date) &&
+			$stmt->execute() &&
+			$stmt->bind_result($idFreeze) &&
+			$stmt->fetch()
+		) {
+			$stmt->close();
+			return true;
+
+		} else {
+			return false;
+		}
+	}
 
     function restapi_getCurrentStatus($id, $date) {
         $dayInfo = array();

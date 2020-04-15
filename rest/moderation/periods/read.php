@@ -25,19 +25,7 @@ $dataInput = json_decode($dataInput);
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
-} else if (!isset($dataInput->moduserid) || 
-	!isset($dataInput->qdate) ) {
-
-    header("HTTP/1.1 401 Unauthorized");
-
 } else {
-    $responseArray = $helper->restapi_moderation_freeze_userinput($dataInput);
-	
-	if ( strcmp($responseArray["message"], "ok") == 0 ) {
-		header("HTTP/1.1 200 OK");
-		echo json_encode($responseArray);
-	} else {
-		header("HTTP/1.1 501 APPLICATION ERROR");
-		echo json_encode($responseArray);
-	}
+    $responseList = $helper->restapi_get_workperiods();
+    echo json_encode($responseList);
 }
