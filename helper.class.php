@@ -296,6 +296,109 @@ class Helper
         }
     }
 
+	function restapi_get_user_overtime_list($userid) {
+		$sql = "SELECT A.idPeriod, A.period_start, A.period_end, A.label, B.time_minutes, ";
+		$sql .= "B.idStart FROM `aplan_periods` AS A ";
+		$sql .= "LEFT JOIN aplan_periods_start_values AS B ";
+		$sql .= "ON A.idPeriod=B.idPeriod ";	
+		$sql .= "WHERE user=? OR B.idStart IS NULL ";
+		$sql .= "ORDER BY A.period_start DESC";
+
+		$response = array();
+		$response['status'] = 500;
+		$response['text'] = "Unkown error";
+		
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("i", $userid) && 
+			$stmt->execute() &&
+			$stmt->bind_result($idPeriod, $start, $end, $label, $minutes, $idStart)
+		) {
+			$response['status'] = 200;
+			$response['text'] = "OK";
+			$response['periods'] = array();
+			$index = 0; 
+			while ($stmt->fetch() ) {
+				$response['periods'][] = array();
+				$response['periods'][$index] = array();
+				$response['periods'][$index]['idPeriod'] = $id;
+				$response['periods'][$index]['start'] = $start;
+				$response['periods'][$index]['end'] = $end;
+				$response['periods'][$index]['label'] = $label;
+				$response['periods'][$index]['minutes'] = $minutes;
+				$response['periods'][$index]['idstart'] = $idStart;
+				$index++;
+			}
+			$stmt->close();
+		} else {
+			$response['text'] = "Error " . $stmt->error;
+		}
+
+		return $response;
+	}
+
+	
+	function restapi_set_user_overtime($data) {
+		$id = $data->idStart;
+
+		if ( $id <= 0 ) {
+			return insert_overtime_user_period($data);	
+		} else {
+			return update_overtime_user_period($data);
+		}
+	}
+
+	function update_overtime_user_period($data) {
+		$id = $data->idStart;
+
+		$sql = "UPDATE aplan_periods_start_values SET time_minutes = ? WHERE idStart=?";
+	
+		$response = array();	
+		$response['status'] = 500;
+		$response['text'] = "NOT OK";	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("ii", $time, $id) &&
+			$stmt->execute()
+		) {
+			$response['status'] = 200;
+			$response['text'] = "OK";
+			$stmt->close();
+		} else {
+			$response['text'] = $stmt->error;
+		}
+		
+		return $response; 
+	}
+	function insert_overtime_user_period($data) {
+		$time = $data->time;
+		$user = $data->idUser;
+		$period = $data->idPeriod;
+
+		$sql = "INSERT INTO aplan_periods_start_values (idPeriod, time_minutes, user) VALUES (?,?,?)";
+	
+		$response = array();	
+		$response['status'] = 500;
+		$response['text'] = "NOT OK";	
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ( $stmt->prepare($sql) &&
+			$stmt->bind_param("iii", $period, $time, $user) &&
+			$stmt->execute()
+		) {
+			$response['status'] = 200;
+			$response['text'] = "OK";
+			$stmt->close();
+		} else {
+			$response['text'] = $stmt->error;
+		}
+		
+		return $response; 
+	}
+
+
 	function restapi_delete_workperiod($data) {
 		$id = $data->idPeriod;
 
