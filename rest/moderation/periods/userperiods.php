@@ -40,18 +40,26 @@ if ( isset($_GET["userid"]) ) {
 		die;
 	}
 } else if (
-	isset($dataInput->idStart) || 
 	isset($dataInput->time) ||
 	isset($dataInput->idUser) ||
 	isset($dataInput->idPeriod)
 ) {
+	$userid = $dataInput->idUser;
 	$response = $helper->restapi_set_user_overtime($dataInput);
 
 	if ($response["status"] != 200 ) {
 		header("HTTP/1.1 501 APPLICATION UPDATE ERROR");
+		echo json_encode($response);
 		die;
 	} else {
-		echo json_encode($response);
+		$responseList = $helper->restapi_get_user_overtime_list($userid);
+		
+		if ($responseList["status"] != 200 ) {
+			header("HTTP/1.1 502 INSERT OK FETCH FAILED");
+			die;
+		} else {
+			echo json_encode($responseList);
+		}
 	}
 
 }

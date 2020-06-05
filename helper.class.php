@@ -322,12 +322,12 @@ class Helper
 			while ($stmt->fetch() ) {
 				$response['periods'][] = array();
 				$response['periods'][$index] = array();
-				$response['periods'][$index]['idPeriod'] = $id;
+				$response['periods'][$index]['idPeriod'] = $idPeriod;
 				$response['periods'][$index]['start'] = $start;
 				$response['periods'][$index]['end'] = $end;
 				$response['periods'][$index]['label'] = $label;
 				$response['periods'][$index]['minutes'] = $minutes;
-				$response['periods'][$index]['idstart'] = $idStart;
+				$response['periods'][$index]['idStart'] = $idStart;
 				$index++;
 			}
 			$stmt->close();
@@ -343,14 +343,15 @@ class Helper
 		$id = $data->idStart;
 
 		if ( $id <= 0 ) {
-			return insert_overtime_user_period($data);	
+			return $this->insert_overtime_user_period($data);	
 		} else {
-			return update_overtime_user_period($data);
+			return $this->update_overtime_user_period($data);
 		}
 	}
 
 	function update_overtime_user_period($data) {
 		$id = $data->idStart;
+		$time = $data->minutes;
 
 		$sql = "UPDATE aplan_periods_start_values SET time_minutes = ? WHERE idStart=?";
 	
@@ -372,8 +373,9 @@ class Helper
 		
 		return $response; 
 	}
+
 	function insert_overtime_user_period($data) {
-		$time = $data->time;
+		$time = $data->minutes;
 		$user = $data->idUser;
 		$period = $data->idPeriod;
 
@@ -567,6 +569,51 @@ class Helper
 		return $response;
 	}
 
+	function restapi_moderation_freeze_userinput_list($arrayData) {
+	
+		$id = $arrayData->moduserid;
+		$sql = "SELECT idFreeze, freezedate FROM aplan_freeze WHERE user=? ORDER BY freezedate DESC";
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
+		$response = array();
+		$response['message'] = "not ok";
+
+		if ($stmt->prepare($sql) && $stmt->bind_param("i", $id) && $stmt->execute() && $stmt->bind_result($idFreeze, $freezedate) ) {
+			$index = 0;
+			$response['data'] = array();
+
+			while ($stmt->fetch() ) {
+				$response['data'][] = array();
+				$response['data'][$index]['idFreeze'] = $idFreeze;
+				$response['data'][$index]['freezedate'] = $freezedate;
+				$index++;	
+			}
+
+			$response['message'] = "ok";
+			$stmt->close();
+		}
+
+		
+		return $response;	
+	}
+
+	function restapi_moderation_freeze_delete($idToDelete) {
+		$response = array();
+		$response["message"] = "not ok";
+		$sql = "DELETE FROM aplan_freeze WHERE idFreeze=?";
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+		
+		if ($stmt->prepare($sql) &&
+			$stmt->bind_param("i", $idToDelete) &&
+			$stmt->execute() ) {
+
+			$response["message"] = "ok";
+			$stmt->close();
+		}
+	
+		return $response;
+	}
+
 	function restapi_moderation_freeze_userinput($arrayData) {
 		$id = $arrayData->moduserid;
 		$qdate = $arrayData->qdate;
@@ -648,11 +695,6 @@ class Helper
 
     function restapi_scheduleitems_update($userid, $data)
     {
-        // to be removed:
-        print_r($_REQUEST);
-        echo $_SERVER["REQUEST_METHOD"];
-
-
         $arrData = json_decode($data);
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan2_schedule_items SET dayofWeek=?, time_from=?, time_to=? WHERE idScheduleItem = ?";
