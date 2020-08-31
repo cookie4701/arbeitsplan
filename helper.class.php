@@ -926,7 +926,7 @@ class Helper
     function restapi_schedule_read($userid)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "SELECT idSchedule, startdate, enddate, label FROM aplan2_schedules WHERE userid=?";
+        $sql = "SELECT idSchedule, startdate, enddate, label FROM aplan2_schedules WHERE userid=? ORDER BY startdate DESC";
         $schedules = array();
 
         if ($stmt->prepare($sql)) {

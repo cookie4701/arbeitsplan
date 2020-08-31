@@ -26,11 +26,13 @@ if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
 } else if (!isset($dataInput->userId) ) {
-    header("HTTP/1.1 402 Unauthorized");
+    header("HTTP/1.1 401 Unauthorized");
 
 } else {
-    $deleted = $helper->restapi_scheduleitems_delete($dataInput->userId, json_encode($dataInput) );
+    $delete = $helper->restapi_schedule_delete($dataInput->userId, json_encode($dataInput));
+    if ( $delete == 'ok' ) {
 	header("HTTP/1.1 200 OK");
-
-    //echo json_encode($userScheduleItems);
+    } else {
+	header("HTTP/1.1 500 APPLICATION ERROR");
+    }
 }
