@@ -296,6 +296,49 @@ class Helper
         }
     }
 
+	//! Get holliay periods for a given user
+	function restapi_get_holliday_periods($userid) {
+		$sql = "SELECT idHolliday, startdate, enddate, nbrdays, nbrminutes FROM aplan_holliday_setup WHERE userid=? ";
+
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+		$response['status'] = 500;
+		$response['text'] = "Unkown error";
+
+		if ( ! stmt->prepare($sql) ) {
+			return $response;
+		}
+
+		if (! $stmt->bind_param("i", $userid) ) {
+			return $response;
+		}
+
+		if ( ! $stmt->execute() ) {
+			return $response;
+		}
+
+		if ( ! $stmt->bind_result($idHolliday, $startdate, $enddate, $nbrDays, $nbrMinutes) ) {
+			return $response;
+		}
+
+		$resonse['data'] = array();
+		$i = 0;
+
+		while ($stmt->fetch() ) {
+			$response['data'][$i] = array();
+			$response['data'][$i]['idHolliday'] = $idHolliday;
+			$response['data'][$i]['startdate'] = $startdate;
+			$response['data'][$i]['enddate'] = $enddate;
+			$response['data'][$i]['nbrdays'] = $nbrDays;
+			$response['data'][$i]['nbrminutes'] = $nbrMinutes;
+			$response['data'][$i][] = $;
+			$i++;
+	}
+
+	$stmt->close();
+	$response['status'] = 200;
+	$response['text'] = "ok";
+	return $response;
+
 	//! Get overtime table
 	function restapi_get_user_overtime_list($userid) {
 		$sql = "SELECT A.idPeriod, A.period_start, A.period_end, A.label, B.time_minutes, ";

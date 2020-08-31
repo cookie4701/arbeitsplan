@@ -30,5 +30,10 @@ if ( !isModerator($userid) ) {
 	die;
 } else {
     $responseList = $helper->restapi_get_holliday_periods($dataInput['userId']);
-    echo json_encode($responseList);
+	if (! isset($responseList) || ! isset($responseList["data"]) {
+		header("HTTP/1.1 501 UNKOWN ERROR");
+		die;
+	}
+
+    echo json_encode($responseList["data"]);
 }
