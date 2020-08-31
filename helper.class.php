@@ -296,6 +296,7 @@ class Helper
         }
     }
 
+	//! Get overtime table
 	function restapi_get_user_overtime_list($userid) {
 		$sql = "SELECT A.idPeriod, A.period_start, A.period_end, A.label, B.time_minutes, ";
 		$sql .= "B.idStart FROM `aplan_periods` AS A ";
