@@ -24,16 +24,17 @@ $dataInput = json_decode($dataInput);
 
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
+	die;
 
-} else if ( ! isset($dataInput['userId']) ) {
+} else if ( ! isset($dataInput->userId) ) {
 	header("HTTP/1.1 500 Not enough parameters provided");
 	die;
 } else {
-    $responseList = $helper->restapi_get_holliday_periods($dataInput['userId']);
-	if (! isset($responseList) || ! isset($responseList["data"]) {
+	$responseList = $helper->restapi_get_holliday_periods($dataInput->userId);
+	if (! isset($responseList) || ! isset($responseList["data"]) ) {
 		header("HTTP/1.1 501 UNKOWN ERROR");
 		die;
 	}
 
-    echo json_encode($responseList["data"]);
+	echo json_encode($responseList["data"]);
 }
