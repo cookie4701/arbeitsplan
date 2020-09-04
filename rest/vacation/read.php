@@ -15,6 +15,12 @@ $userid = $data['id'];
 include_once("../../helper.class.php");
 
 $helper = new Helper();
+$list = $helper->restapi_vacation_read($userid);
 
-echo json_encode($helper->restapi_vacation_read($userid));
+if ( $list["status"] == 200 ) {
+	header("HTTP/1.1 200");
+	echo json_encode($list["data"]);
+} else {
+	header("HTTP/1.1 500");
+}
 

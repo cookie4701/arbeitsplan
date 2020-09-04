@@ -1081,56 +1081,93 @@ class Helper
         return $msg;
     }
 
-    function restapi_hollidays_create($userid, $data)
+    //! Creates a dataset in table aplan_holliday_setup
+    //! The parameter needs to have the following fields: 
+    //!  startdate DATE in format YYYY-MM-DD
+    //!  enddate DATE in format YYYY-MM-DD
+    //!  days INT Number of days
+    //!  minutes INT Number of minutes
+    //!  userid INT user id 
+    function restapi_hollidays_create($arrData)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "INSERT INTO aplan_holliday_setup (userid, startdate, enddate, nbrdays) ";
-        $sql .= "VALUES (?, ?, ?, ?)";
-        $msg = "not ok";
+        $sql = "INSERT INTO aplan_holliday_setup (userid, startdate, enddate, nbrdays, nbrminutes) ";
+        $sql .= "VALUES (?, ?, ?, ?, ?)";
+	$response = array();
+	$response["status"] = 500;
 
         if (get_class($stmt) !== "mysqli_stmt") {
-            $msg = "not a mysqli_stmt";
-            return $msg;
+            $response["status"] = 501;
+	    $response["text"] = "Failed ot initialize mysqli stmt";
+	    return $response;
         }
 
         if ($stmt->prepare($sql)) {
-            $arrData = json_decode($data);
-            if (!isset($arrData->startdate)) return "startdate mssing";
-            if (!isset($arrData->enddate)) return "enddate mssing";
-            if (!isset($arrData->nbrdays)) return "nbrdays missing";
+            //$arrData = json_decode($data);
+            if (!isset($arrData->startdate)) {
+		$response["status"] = 510;
+		return $response;
+	    }
+
+            if (!isset($arrData->enddate)) {
+		$response["status"] = 511;
+		return $response;
+	    }
+
+            if (!isset($arrData->days)) {
+		$response["status"] = 512;
+		return $response;
+	    }
+
+	    if (!isset($arrData->minutes)) {
+		$response["status"] = 513;
+		return $response;
+	    }
+
+	    if (!isset($arrData->userid)) {
+		$response["status"] = 514;
+		return $response;
+	    }
 
             $startdate = $arrData->startdate;
             $enddate = $arrData->enddate;
-            $nbrdays = $arrData->nbrdays;
-            if ($stmt->bind_param("issi", $userid, $startdate, $enddate, $nbrdays) && $stmt->execute()) {
-                $msg = "ok";
+            $nbrdays = $arrData->days;
+	    $nbrminutes = $arrData->minutes;
+	    $userid = $arrData->userid;
+
+            if ($stmt->bind_param("issii", $userid, $startdate, $enddate, $nbrdays, $nbrminutes) && $stmt->execute()) {
+                $response["text"] = "ok";
+		$response["status"] = 200;
             } else {
-                $msg = "not ok " . $stmt->error;
+                $response["text"] = "not ok " . $stmt->error;
+		$response["status"] = 504;
             }
             $stmt->close();
         } else {
-            $msg = "prepare failed " . $stmt->error;
+            $response["text"] = "prepare failed " . $stmt->error;
+            $response["status"] = 505;
         }
 
-        return $msg;
+        return $response;
 
     }
 
     function restapi_hollidays_read($userid)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "SELECT idHolliday, startdate, enddate, nbrdays FROM aplan_holliday_setup WHERE userid=? ORDER BY startdate";
+        $sql = "SELECT idHolliday, startdate, enddate, nbrdays, nbrminutes FROM aplan_holliday_setup WHERE userid=? ORDER BY startdate DESC";
         $reco = array();
 
         if ($stmt->prepare($sql)) {
             if ($stmt->bind_param("i", $userid) && $stmt->execute()) {
-                $stmt->bind_result($idDrive, $startdate, $enddate, $val);
+                $stmt->bind_result($idDrive, $startdate, $enddate, $val, $valMinutes);
                 while ($stmt->fetch()) {
                     $item = array(
                         "idHolliday" => $idDrive,
                         "startdate" => $startdate,
                         "enddate" => $enddate,
-                        "nbrdays" => $val
+                        "nbrdays" => $val,
+			"nbrminutes" => $valMinutes
                     );
                     $reco[] = $item;
                 }
@@ -1142,102 +1179,158 @@ class Helper
         return $reco;
     }
 
-    function restapi_hollidays_delete($userid, $data)
+    function restapi_hollidays_delete($arrData)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $arrData = json_decode($data);
-        $msg = "ok";
+        //$arrData = json_decode($data);
+	$response = array();
+	$response["status"] = 500;
 
-        if (!isset($arrData->idHolliday)) return "need idHolliday";
+        if (!isset($arrData->hollidayid)) {
+		$response["status"] = 501;
+		return $response;
+	}
 
-        $idHolliday = $arrData->idHolliday;
+	if (! isset($arrData->userid) ) {
+		$response["status"] = 502;
+		return $repsonse;
+	}
+
+        $idHolliday = $arrData->hollidayid;
+	$userid = $arrData->userid;
 
         $sql = "DELETE FROM aplan_holliday_setup WHERE userid=? AND idHolliday = ?";
 
         if ($stmt->prepare($sql)) {
             if ($stmt->bind_param("ii", $userid, $idHolliday) && $stmt->execute()) {
+		$response["status"] = 200;
+		$response["text"] = "OK";
 
             } else {
-                $msg = $stmt->error;
+		$response["status"] = 503;
+                $response["text"] = $stmt->error;
 
             }
 
             $stmt->close();
         }
 
-        return $msg;
+        return $response;
     }
 
-    function restapi_vacation_create($userid, $data)
+    function restapi_vacation_create($arrData)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "INSERT INTO aplan_vacation_setup (userid, startdate, enddate, nbrdays) ";
-        $sql .= "VALUES (?, ?, ?, ?)";
-        $msg = "not ok";
+        $sql = "INSERT INTO aplan_vacation_setup (userid, startdate, enddate, nbrdays, nbrminutes) ";
+        $sql .= "VALUES (?, ?, ?, ?, ?)";
+	$response["status"] = 200;
 
         if (get_class($stmt) !== "mysqli_stmt") {
-            $msg = "not a mysqli_stmt";
-            return $msg;
+	    $response["status"] = 500;
+            return $response;
         }
 
         if ($stmt->prepare($sql)) {
-            $arrData = json_decode($data);
-            if (!isset($arrData->startdate)) return "startdate mssing";
-            if (!isset($arrData->enddate)) return "enddate mssing";
-            if (!isset($arrData->nbrdays)) return "nbrdays missing";
+		if (!isset($arrData->startdate)) {
+			$response["status"] = 501;
+			return $response;
+		}
+            
+		if (!isset($arrData->enddate)) {
+			$response["status"] = 502;
+			return $response;
+		}
 
-            $startdate = $arrData->startdate;
-            $enddate = $arrData->enddate;
-            $nbrdays = $arrData->nbrdays;
-            if ($stmt->bind_param("issi", $userid, $startdate, $enddate, $nbrdays) && $stmt->execute()) {
-                $msg = "ok";
-            } else {
-                $msg = "not ok " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            $msg = "prepare failed " . $stmt->error;
-        }
+		if (!isset($arrData->days)) {
+			$response["status"] = 503;
+			return $response;
+		}
 
-        return $msg;
+		if (!isset($arrData->userid)) {
+			$response["status"] = 504;
+			return $response;
+		}
+
+		if (!isset($arrData->minutes)) {
+			$response["status"] = 505;
+			return $response;
+		}
+            
+		$startdate = $arrData->startdate;
+		$enddate = $arrData->enddate;
+		$nbrdays = $arrData->days;
+		$userid = $arrData->userid;
+		$nbrminutes = $arrData->minutes;
+
+		if ($stmt->bind_param("issii", $userid, $startdate, $enddate, $nbrdays, $nbrminutes) && $stmt->execute()) {
+		    } else {
+			$response["status"] = 506;
+		    }
+		    $stmt->close();
+		} else {
+		    $response["status"] = 507;
+		}
+
+        return $response;
 
     }
 
     function restapi_vacation_read($userid)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "SELECT idVacation, startdate, enddate, nbrdays FROM aplan_vacation_setup WHERE userid=? ORDER BY startdate";
+        $sql = "SELECT idVacation, startdate, enddate, nbrdays, nbrminutes FROM aplan_vacation_setup WHERE userid=? ORDER BY startdate";
         $reco = array();
+	$reco["status"] = 200;
+	$reco["text"] = "OK";
 
         if ($stmt->prepare($sql)) {
             if ($stmt->bind_param("i", $userid) && $stmt->execute()) {
-                $stmt->bind_result($idVacation, $startdate, $enddate, $val);
+                $stmt->bind_result($idVacation, $startdate, $enddate, $val, $valMinutes);
+
+		$reco["data"] = array();
+
                 while ($stmt->fetch()) {
                     $item = array(
                         "idVacation" => $idVacation,
                         "startdate" => $startdate,
                         "enddate" => $enddate,
-                        "nbrdays" => $val
+                        "nbrdays" => $val,
+			"nbrminutes" => $valMinutes
                     );
-                    $reco[] = $item;
+                    $reco["data"][] = $item;
                 }
-            }
+            } else {
+		$reco["status"] = 501;
+		$reco["text"] = "Not ok";
+	    }
 
             $stmt->close();
-        }
+        } else {
+		$reco["status"] = 500;
+		$reco["text"] = "Not ok";
+	}
 
         return $reco;
     }
 
-    function restapi_vacation_delete($userid, $data)
+    function restapi_vacation_delete($arrData)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $arrData = json_decode($data);
-        $msg = "ok";
+	$response = array();
+	$response["status"] = 200;
 
-        if (!isset($arrData->idVacation)) return "need idVacation";
+	if (!isset($arrData->idVacation)) {
+		$response["status"] = 500;
+		return $response;
+	}
+
+	if (!isset($arrData->userid)) {
+		$response["status"] = 502;
+		return $response;
+	}
 
         $idVacation = $arrData->idVacation;
+	$userid = $arrData->userid;
 
         $sql = "DELETE FROM aplan_vacation_setup WHERE userid=? AND idVacation = ?";
 
@@ -1245,14 +1338,16 @@ class Helper
             if ($stmt->bind_param("ii", $userid, $idVacation) && $stmt->execute()) {
 
             } else {
-                $msg = $stmt->error;
+                $response["status"] = 500;
 
             }
 
             $stmt->close();
-        }
+        } else {
+		$response["status"] = 501;
+	}
 
-        return $msg;
+        return $response;
     }
 
     function restapi_workareas_create($userid, $data)

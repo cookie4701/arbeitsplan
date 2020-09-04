@@ -25,9 +25,9 @@ $dataInput = json_decode($dataInput);
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
-} else if ( isset($dataInput->idPeriod) ) {
-    $responseDelete = $helper->restapi_delete_workperiod($dataInput);
-    echo json_encode($responseDelete);
+} else if ( isset($dataInput->hollidayid) ) {
+    $responseDelete = $helper->restapi_hollidays_delete($dataInput);
+	header("HTTP/1.1 " . $responseDelete["status"]);
 } else {
 	header("HTTP/1.1 501 WRONG PARAMETERS");
 	die;
