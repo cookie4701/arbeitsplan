@@ -2141,7 +2141,6 @@ class Helper
         $idxWorkdone = 0;
 
         while ($stmt->fetch()) {
-            //$dayInfo['id'] = $workdayId;
             $dayInfo['workdone'][] = array();
             $dayInfo['workdone'][$idxWorkdone]['hours'] = substr($hours, 0, 5);
             $dayInfo['workdone'][$idxWorkdone]['rank'] = $rank;
@@ -2218,17 +2217,52 @@ class Helper
 
         $ndate = mktime(0, 0, 0, $dateparts[1], $dateparts[2], $dateparts[0] );
 
+	$params = array();
+	$params['id'] = $id;
+	$params['date'] = $date;
+
         if ( date('N', $ndate) == 1) {
             $dayInfo['timeAccount'] = $this->calcTimeAccount($id, $date);
             $dayInfo['remainVavationBeforeDate'] = $this->calcVacationRemainBeforeDate($id, $date);
+	    $dayInfo['remainVacationTimeBeforeDate'] = $this->calcVacationTimeRemainBeforeDate($params);
             $dayInfo['vacationPeriod'] = $this->getVacationPeriod($id, $date);
             $dayInfo['remainHollidayBeforeDate'] = $this->calcHollidayRemainBeforeDate($id, $date);
             $dayInfo['hollidayPeriod'] = $this->getHollidayPeriod($id, $date);
+	    $params['hollidayperiod'] = $dayInfo['hollidayPeriod'];
+	    $dayInfo['remainHollidayTimeBeforeDate'] = $this->calcHollidayTimeRemainBeforeDate($params);
         }
 
         return $dayInfo;
 
     }
+
+
+	function calcVacationTimeRemainBeforeDate($params) {
+		$user = $params["id"];
+		$date = $params["date"];
+
+		$totalTime = $this->getVacationTimeTotal($user, $date);
+
+		$startDateVacationPeriod = $this->getVacationPeriodStart($user, $date);
+
+		$timeTaken = $this->getVacationTimeTakenInPeriod($user, $startDateVacationPeriod, $date);
+
+		$result = $totalTime - $timeTaken;
+
+		return $result;
+	}
+
+	function calcHollidayTimeRemainBeforeDate($params) {
+		$user = $params["id"];
+		$date = $params["date"];
+
+		$totalTime = $this->getHollidayTimeTotal($user, $date);
+		$startDateHollidayperiod = $this->getHollidayPeriodStart($user, $date);
+		$timeTaken = $this->getHollidayTimeTakenInPeriod($user, $startDateHollidayperiod, $date);
+		$result = $totalTime - $timeTaken;
+		return $result;
+	}
+
 
 	function restapi_get_bonus_time($id, $date) {
 		$bonusTimes = array();
@@ -2493,6 +2527,24 @@ class Helper
         return $endDate;
     }
 
+    function getHollidayPeriodStart($user, $date) {
+	$sql = "SELECT startdate FROM aplan_holliday_setup WHERE userid=? AND enddate > ? AND startdate <=?";
+	$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+	if (! $stmt->prepare($sql)) return 0;
+	$startDate = "2010-01-01";
+	if (! $stmt->bind_param("iss", $user, $date, $date) ) return 0;
+        if (
+            $stmt->execute() &&
+            $stmt->bind_result($startDate) &&
+            $stmt->fetch()
+        ) {
+
+        }
+
+        $stmt->close();
+	return $startDate;
+    }
+
     function getVacationPeriodStart($user, $date) {
         $sql = "SELECT startdate FROM aplan_vacation_setup WHERE userid=? AND enddate > ? AND startdate <= ?";
         $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
@@ -2511,6 +2563,142 @@ class Helper
         $stmt->close();
         return $startDate;
     }
+
+
+	// 
+	function getTableDaysWithHollidayId($user, $start, $end, $hollidayId) {
+		$sql = "SELECT dateofday FROM aplan_arbeitstage WHERE holliday_id=? AND dateofday >= ? AND dateofday < ? AND user_id=?";
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		$table = array();
+		if ( ! $stmt->prepare($sql) ) return $table;
+
+		if ( ! $stmt->bind_param("issi", $hollidayId, $start, $end, $user) ) return $table;
+
+		if ( ! $stmt->execute() ) return $table;
+
+		if ( ! $stmt->bind_result($dateofday) ) return $table;
+
+		while ($stmt->fetch() ) {
+			$table[] = $dateofday;
+		}
+
+		$stmt->close();
+		return $table;
+	}
+
+	//! Returns an ID for the applicable schedule (according to refdate)
+	function getScheduleId($user, $refdate) {
+		$refId = -1;
+		$sql = "SELECT idSchedule FROM aplan2_schedules WHERE userid = ? AND startdate <= ? AND enddate >= ?";
+
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if (! $stmt->prepare($sql) ) return $refId;
+		if (! $stmt->bind_param("iss", $user, $refdate, $refdate) ) return $refId;
+		if (! $stmt->execute() ) return $refId;
+		if (! $stmt->bind_result($refId) ) return $refId;
+		$stmt->fetch();
+		$stmt->close();
+		return $refId;
+	}
+
+	// Retrieves the work to for a given schedule
+	function getTableWorkToDo($idSchedule) {
+		// prepare table
+		$table = array();
+		for ($i = 0; $i < 7; $i++ ) {
+			$table[] = 0; // table indices are the days 0..6
+		}
+		$sql = "SELECT dayOfWeek, time_from, time_to FROM aplan2_schedule_items WHERE idSchedule = ? ORDER BY dayOfWeek";
+
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if (! $stmt->prepare($sql) ) return $table;
+		if (! $stmt->bind_param("i", $idSchedule) ) return $table;
+		if (! $stmt->execute() ) return $table;
+		if (! $stmt->bind_result($dow, $from, $to) ) return $table;
+		while ($stmt->fetch() ) {
+			if ($dow >= 0 && $dow <= 6) {
+				$table[$dow] += $this->myTimeToInt($to);
+				$table[$dow] -= $this->myTimeToInt($from);
+			}
+		}
+
+		$stmt->close();
+		return $table;
+
+	}
+
+	function getTimeTakenInPeriodByType($user, $start, $end, $typeFree) {
+		$workTable = array();
+
+		// get table with days where vacationtime has been chosen
+		$workTable["days"] = $this->getTableDaysWithHollidayId($user, $start, $end, $typeFree);
+
+		// get ID of applicable workplan
+		$idSchedule = $this->getScheduleId($user, $end);
+
+		if ($idSchedule < 0 ) return 0;
+
+		// load work to do table
+		$workTable["todo"] = $this->getTableWorkToDo($idSchedule);
+
+		if ( count($workTable["todo"]) != 7 ) return 0;
+
+		// run through the 'days' and transform it to the day of week and add the
+		// time to do to the result
+		$result = 0;
+		for ($i = 0; $i < count($workTable["days"]); $i++ ) {
+			$tempDate = strtotime($workTable["days"][$i]);
+			$dow = date ("w", $tempDate);
+			if ($dow == 0) $dow = 6;
+			else { 
+				$dow--;
+			}
+			$result += $workTable["todo"][$dow];
+		}
+		return $result;
+
+	}
+	function getVacationTimeTakenInPeriod($user, $start, $end) {
+		$result = $this->getTimeTakenInPeriodByType($user, $start, $end, 7);
+		return $result;
+	}
+
+	function getHollidayTimeTakenInPeriod($user, $start, $end) {
+		$result = $this->getTimeTakenInPeriodByType($user, $start, $end, 6);
+		return $result;
+	}
+
+	function getVacationTimeTotal($user, $date) {
+		$sql = "SELECT nbrminutes FROM aplan_vacation_setup WHERE userid=? AND enddate > ? AND startdate <= ?";
+		$totalTime = 0;
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if (! $stmt->prepare($sql) ) return 0;
+		if (! $stmt->bind_param("iss", $user, $date, $date) ) return 0;
+		if ( $stmt->execute() && $stmt->bind_result($totalTime) && $stmt->fetch() ) {
+
+		} else {
+			return 0;
+		}
+		
+		$stmt->close();
+		return $totalTime;
+	}
+
+	function getHollidayTimeTotal($user, $date) {
+		$sql = "SELECT nbrminutes FROM aplan_holliday_setup WHERE userid=? AND enddate > ? AND startdate <= ?";
+		$totalTime = 0;
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+		if (! $stmt->prepare($sql) ) return 0;
+		if (! $stmt->bind_param("iss", $user, $date, $date) ) return 0;
+		if ( $stmt->execute() && $stmt->bind_result($totalTime) && $stmt->fetch() ) {
+
+		} else {
+			return 0;
+		}
+
+		$stmt->close();
+		return $totalTime;
+	}
 
     function getVacationDaysTotal($user, $date) {
         $sql = "SELECT nbrdays FROM aplan_vacation_setup WHERE userid=? AND enddate > ? AND startdate <= ?";
@@ -4054,6 +4242,7 @@ class Helper
 
     }
 
+
     function TransformDateToUS($inputdate)
     {
         $startdatum = $inputdate;
@@ -4068,6 +4257,27 @@ class Helper
 
     }
 
+	function mktime_from_us_date($mdate) {
+		$year = substr($mdate, 0,4);
+		$month = substr($mdate, 5, 2);
+		$day = substr($mdate, 8, 2);
+
+		$mtime = mktime(0,0,0,$month, $day, $year);
+
+		return $mtime;
+	}
+
+	function mktime_from_be_date($mdate) {
+
+		$year = substr($mdate, 6,4);
+		$month = substr($mdate, 3, 2);
+		$day = substr($mdate, 0, 2);
+
+		$mtime = mktime(0,0,0,$month, $day, $year);
+
+		return $mtime;
+	}
+
     function EntetiesToCharacters($sObj)
     {
         $ret = str_replace("&uuml;", "\u00fc", $sObj);
@@ -4080,6 +4290,57 @@ class Helper
         $ret = str_replace("\u00fc", "&uuml;", $sObj);
 
         return $ret;
+    }
+
+
+    function myTimeToInt($tval) {
+	$parts = explode(":", $tval);
+
+	if (count($parts)< 2 ) {
+		return 0;
+	}
+
+	if (count($parts) > 3 ) {
+		return 0;
+	}
+
+	$prefix = "";
+
+	if ( strpos( $parts[0], "-") ) {
+		$parts[0] = substr($parts[0], 1, strlen($parts[0]) - 1);
+		$prefix = "-";
+	}
+
+	$r = intval($parts[1], 10);
+	$r += intval($parts[0], 10) * 60;
+
+	if ($prefix == "-") $r *= -1;
+
+	return $r;	
+    }
+
+    function intToTime($tval) {
+	$sign = "";
+	if ($tval < 0 ) {
+		$sign = "-";
+		$tval *= -1;
+	}
+	$h = intval($tval / 60, 10);
+	$m = $tval - ($h * 60);
+	$superzero = "";
+	if ($m < 10 ) $superzero = "0";
+	
+	return "$sign$h:$superzero$m";
+
+    }
+
+    public function subtract_times($valA, $valB) {
+	$a = $this->myTimeToInt($valA);
+	$b = $this->myTimeToInt($valB);
+
+	$r = $a - $b;
+
+	return $this->intToTime($r);
     }
 
     public function generateKmInvoiceTable($user)
