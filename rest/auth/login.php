@@ -12,6 +12,7 @@ require("../cors.php");
 cors();
 
 require("../../helper.class.php");
+require("../member.php");
 
 $data = file_get_contents("php://input");
 
@@ -65,6 +66,7 @@ if ( $stmt->bind_result($resId, $resUname) ) {
                         $msg['auth'] = "true";
                         $msg['user'] = $resUname;
                         $msg['token'] = $token;
+			$msg['isModerator'] = isModerator($resId);
                         echo json_encode($msg);
                 } catch (Exception $e) {
                         echo 'not ok... catch: ' . $e;
