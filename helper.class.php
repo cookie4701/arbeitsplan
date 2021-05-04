@@ -561,12 +561,18 @@ class Helper
 				$response['rides'][$index]['from'] = $from;
 				$response['rides'][$index]['to'] = $to;
 				$response['rides'][$index]['km'] = $km;
-				$response['rides'][$index]['rate'] = 0.0;
+				$response['rides'][$index]['rate'] = 0.0; // $this->get_rate_for_user_day($userid, $day) ;
 				$index++;
 
 			}
 
 			$stmt->close();
+
+			for ($rate_index = 0; $rate_index < count($response['rides']); $rate_index++ ) {
+				$response['rides'][$rate_index]['rate'] = 
+					$this->get_rate_for_user_day($userid, 
+					$response['rides'][$rate_index]['day'] );
+			}
 
 		} else {
 			$response['message'] = $this->getDatabaseConnection()->getDatabaseConnection()->error;
@@ -574,6 +580,30 @@ class Helper
 
 		return $response;
 			
+	}
+
+	function get_rate_for_user_day($user, $day) {
+		$sql = "SELECT val FROM aplan_drive_recompensation WHERE ";
+		$sql .= "userid=? AND ? <= enddate AND ? >= startdate";
+		
+		$rate = 0.123;
+		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+
+		if ($stmt->prepare($sql) &&
+			$stmt->bind_param("iss", $user, $day, $day) &&
+			$stmt->execute() &&
+	       		$stmt->bind_result($val) ) {
+
+			if ($stmt->fetch() ) {
+				$rate = $val;
+			}
+
+			$stmt->close();
+		} else {
+			return $stmt->error;
+		}
+
+		return $rate;
 	}
 
 	function restapi_selfstat_workareas($userid, $sdate, $edate) {
