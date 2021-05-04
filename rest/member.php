@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../config.php';
+//require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../helper.class.php';
+
+$helper = new Helper();
 
 function dbConnection() {
     try {

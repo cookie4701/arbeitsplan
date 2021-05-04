@@ -11,9 +11,9 @@ require("../../jwt.php");
 $data = getJwtData();
 $userid = $data['id'];
 
-include_once("../../../helper.class.php");
+//include_once("../../../helper.class.php");
 
-$helper = new Helper();
+//$helper = new Helper();
 
 require_once ("../../member.php");
 $code = "";
@@ -26,7 +26,7 @@ if ( !isModerator($userid) ) {
     $code = $_GET["orgacode"];
 
     $nbrUsers = moderatesUsersNumber($userid, $code);
-	header('Content-Type: application/json;charset=utf-8');
+	//header('Content-Type: application/json;charset=utf-8');
     echo json_encode($nbrUsers);
 
 	if ( json_last_error() != 0 ) {

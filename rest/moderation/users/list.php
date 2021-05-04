@@ -14,10 +14,6 @@ $userid = $data['id'];
 $returnPage = 1;
 $returnItems = 10;
 
-include_once("../../../helper.class.php");
-
-$helper = new Helper();
-
 require_once ("../../member.php");
 $code = "";
 
@@ -37,7 +33,7 @@ if ( isset($_GET["nbritems"]) ) {
 }
 
     $listUsers = moderatesUsers($userid, $code, $returnPage, $returnItems);
-	header('Content-Type: application/json;charset=utf-8');
+	//header('Content-Type: application/json;charset=utf-8');
     echo json_encode($listUsers);
 
 	if ( json_last_error() != 0 ) {

@@ -23,6 +23,7 @@ $dataInput = file_get_contents("php://input");
 $dataInput = json_decode($dataInput);
 
 if ( !isModerator($userid) ) {
+
     header("HTTP/1.1 401 Unauthorized");
 
 } else if (!isset($dataInput->singleuserid) || !isset($dataInput->qdate) ) {
