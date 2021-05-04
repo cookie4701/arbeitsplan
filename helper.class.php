@@ -18,6 +18,7 @@ if (PHP_VERSION_ID < 50600) {
 
 setlocale(LC_TIME, 'de_DE.utf8');
 
+
 class Helper
 {
 
@@ -34,11 +35,16 @@ class Helper
     {
 
         try {
-            $this->dbx = new DatabaseConnection(
-                CConfig::$dbhost,
-                CConfig::$dbuser,
-                CConfig::$dbpass,
-                CConfig::$dbname);
+		CConfig::$dbuser = (empty(getenv('MYSQL_USER'))) ? CConfig::$dbuser : getenv('MYSQL_USER');
+		CConfig::$dbhost = (empty(getenv('MYSQL_HOST'))) ? CConfig::$dbhost : getenv('MYSQL_HOST');
+		CConfig::$dbpass = (empty(getenv('MYSQL_PASSWORD'))) ? CConfig::$dbpass : getenv('MYSQL_PASSWORD');
+		CConfig::$dbname = (empty(getenv('MYSQL_DB'))) ? CConfig::$dbname : getenv('MYSQL_DB');
+
+		$this->dbx = new DatabaseConnection(
+			CConfig::$dbhost,
+			CConfig::$dbuser,
+			CConfig::$dbpass,
+			CConfig::$dbname);
 
             $this->dbx->getDatabaseConnection()->query("SET NAMES 'utf8'");
             $this->dbx->getDatabaseConnection()->set_charset("utf8");
