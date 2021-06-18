@@ -1764,7 +1764,7 @@ class Helper
 
     function TimeToInt($tvar)
     {
-        $el = explode(":", substr($tvar,0, 5) ) ;
+        $el = explode(":", $tvar ) ;
         if (count($el) != 2) return 0;
         $result = intval($el[0]) * 60;
         $result += intval($el[1]);
