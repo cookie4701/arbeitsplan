@@ -2773,6 +2773,26 @@ class Helper
 
     }
 
+    function getPeriodStartWithDate($user, $date) {
+        $sql = "SELECT A.period_start FROM aplan_periods AS A ";
+        $sql .= "LEFT JOIN aplan_periods_start_values AS B ";
+        $sql .= "ON A.idPeriod = B.idPeriod ";
+        $sql .= " WHERE B.user=? AND A.period_start <= ? AND A.period_end >= ?";
+        $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
+        $sdate = "2010-01-01";
+
+        if (! $stmt->prepare($sql)) return 0;
+
+        if ( ! $stmt->bind_param("iss", $user, $date, $date) ) return 0;
+
+        if ( $stmt->execute() && $stmt->bind_result($sdate) && $stmt->fetch() ) {
+
+        }
+
+        $stmt->close();
+        return $sdate;
+    }
+
     function getMktimeFromString($datestring) {
         $arrDate = explode("-", $datestring );
 
@@ -2785,7 +2805,7 @@ class Helper
 
     function calcTimeAccount($user, $date) {
         // get startdate (YYYY-MM-DD)
-        $arrStartdate = explode("-", substr($this->getPeriodStart($user), 0, 10) );
+        $arrStartdate = explode("-", substr($this->getPeriodStartWithDate($user, $date), 0, 10) );
         if ( count($arrStartdate) < 3 ) return 0;
 
         $arrEnddate = explode("-", $date);
