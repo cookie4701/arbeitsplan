@@ -10,7 +10,7 @@ function getJwtData() {
     $secret = "oobar&123ABC";
 
     $headers = apache_request_headers();
-    $token = $headers['Authorization'];
+    $token = $headers['authorization'];
 
     $jwt = new Jwt($token, $secret);
 
