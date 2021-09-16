@@ -1,6 +1,10 @@
 <?php
 
 CConfig::$dbuser = empty(getenv('MYSQL_USER')) ? 'dbuser' : getenv('MYSQL_USER');
+CConfig::$dbpass = empty(getenv('MYSQL_PASSWORD')) ? 'defaultpassword' : getenv('MYSQL_PASSWORD');
+CConfig::$dbhost = empty(getenv('MYSQL_HOST')) ? 'localhost' : getenv('MYSQL_HOST');
+CConfig::$dbname = empty(getenv('MYSQL_DB')) ? 'aplandb' : getenv('MYSQL_DB');
+CConfig::$jwtsecret = empty(getenv('JWTSECRET')) ? '*23ABC7891ab' : getenv('JWTSECRET');
 
 class CConfig {
 	public static $dbuser; // = 'dbuser'; // empty(getenv('MYSQL_USER')) ? 'dbuser' : getenv('MYSQL_USER');
