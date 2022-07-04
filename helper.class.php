@@ -350,25 +350,25 @@ class Helper
 		$sql = "SELECT A.idPeriod, A.period_start, A.period_end, A.label, B.time_minutes, ";
 		$sql .= "B.idStart FROM `aplan_periods` AS A ";
 		$sql .= "LEFT JOIN aplan_periods_start_values AS B ";
-		$sql .= "ON A.idPeriod=B.idPeriod ";	
+		$sql .= "ON A.idPeriod=B.idPeriod ";
 		$sql .= "WHERE user=? OR B.idStart IS NULL ";
 		$sql .= "ORDER BY A.period_start DESC";
 
 		$response = array();
 		$response['status'] = 500;
 		$response['text'] = "Unkown error";
-		
+
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
-			$stmt->bind_param("i", $userid) && 
+			$stmt->bind_param("i", $userid) &&
 			$stmt->execute() &&
 			$stmt->bind_result($idPeriod, $start, $end, $label, $minutes, $idStart)
 		) {
 			$response['status'] = 200;
 			$response['text'] = "OK";
 			$response['periods'] = array();
-			$index = 0; 
+			$index = 0;
 			while ($stmt->fetch() ) {
 				$response['periods'][] = array();
 				$response['periods'][$index] = array();
@@ -388,12 +388,12 @@ class Helper
 		return $response;
 	}
 
-	
+
 	function restapi_set_user_overtime($data) {
 		$id = $data->idStart;
 
 		if ( $id <= 0 ) {
-			return $this->insert_overtime_user_period($data);	
+			return $this->insert_overtime_user_period($data);
 		} else {
 			return $this->update_overtime_user_period($data);
 		}
@@ -404,10 +404,10 @@ class Helper
 		$time = $data->minutes;
 
 		$sql = "UPDATE aplan_periods_start_values SET time_minutes = ? WHERE idStart=?";
-	
-		$response = array();	
+
+		$response = array();
 		$response['status'] = 500;
-		$response['text'] = "NOT OK";	
+		$response['text'] = "NOT OK";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
@@ -420,8 +420,8 @@ class Helper
 		} else {
 			$response['text'] = $stmt->error;
 		}
-		
-		return $response; 
+
+		return $response;
 	}
 
 	function insert_overtime_user_period($data) {
@@ -430,10 +430,10 @@ class Helper
 		$period = $data->idPeriod;
 
 		$sql = "INSERT INTO aplan_periods_start_values (idPeriod, time_minutes, user) VALUES (?,?,?)";
-	
-		$response = array();	
+
+		$response = array();
 		$response['status'] = 500;
-		$response['text'] = "NOT OK";	
+		$response['text'] = "NOT OK";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
@@ -446,8 +446,8 @@ class Helper
 		} else {
 			$response['text'] = $stmt->error;
 		}
-		
-		return $response; 
+
+		return $response;
 	}
 
 
@@ -455,22 +455,22 @@ class Helper
 		$id = $data->idPeriod;
 
 		$sql = "DELETE FROM aplan_periods WHERE idPeriod=?";
-	
-		$response = array();	
+
+		$response = array();
 		$response['status'] = 500;
-		$response['text'] = "NOT OK";	
+		$response['text'] = "NOT OK";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
 			$stmt->bind_param("i", $id) &&
-			$stmt->execute() 
+			$stmt->execute()
 		) {
 			$response['status'] = 200;
 			$response['text'] = "OK";
 			$stmt->close();
 		} else {
 			$response['text'] = $stmt->error;
-		} 
+		}
 
 		return $response;
 	}
@@ -480,8 +480,8 @@ class Helper
 		$sql = "SELECT idPeriod, period_start, period_end, label FROM aplan_periods";
 		$sql .= " ORDER BY period_start DESC";
 
-		$response = array();	
-		$response['status'] = 500;	
+		$response = array();
+		$response['status'] = 500;
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
@@ -491,7 +491,7 @@ class Helper
 			$response['status'] = 200;
 			$response['text'] = "OK";
 			$response['periods'] = array();
-			$index = 0; 
+			$index = 0;
 			while ($stmt->fetch() ) {
 				$response['periods'][] = array();
 				$response['periods'][$index] = array();
@@ -516,20 +516,20 @@ class Helper
 
 		$sql = "INSERT INTO aplan_periods (label, period_start, period_end) VALUES (?,?,?)";
 
-		$response = array();	
-		$response['status'] = 500;	
+		$response = array();
+		$response['status'] = 500;
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
 			$stmt->bind_param("sss", $label, $startdate, $enddate) &&
-			$stmt->execute() 
+			$stmt->execute()
 		) {
 			$response['status'] = 200;
 			$stmt->close();
-		} 
+		}
 
 		return $response;
-			
+
 	}
 
 	function restapi_get_rides($params) {
@@ -542,8 +542,8 @@ class Helper
 		$sql .= " WHERE user_id = ? AND day >= ? AND day <= ?  ";
 		$sql .= " ORDER BY day";
 
-		$response = array();	
-		$response['status'] = 500;	
+		$response = array();
+		$response['status'] = 500;
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
@@ -569,8 +569,8 @@ class Helper
 			$stmt->close();
 
 			for ($rate_index = 0; $rate_index < count($response['rides']); $rate_index++ ) {
-				$response['rides'][$rate_index]['rate'] = 
-					$this->get_rate_for_user_day($userid, 
+				$response['rides'][$rate_index]['rate'] =
+					$this->get_rate_for_user_day($userid,
 					$response['rides'][$rate_index]['day'] );
 			}
 
@@ -579,13 +579,13 @@ class Helper
 		}
 
 		return $response;
-			
+
 	}
 
 	function get_rate_for_user_day($user, $day) {
 		$sql = "SELECT val FROM aplan_drive_recompensation WHERE ";
 		$sql .= "userid=? AND ? <= enddate AND ? >= startdate";
-		
+
 		$rate = 0.123;
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
@@ -613,8 +613,8 @@ class Helper
 		$sql .= "WHERE A.user_id = ? AND A.date >= ? AND A.date <= ? AND B.user=? ";
 		$sql .= "AND A.hours > 0 ";
 		$sql .= "ORDER BY B.rank";
-	
-		$response['code'] = 500;	
+
+		$response['code'] = 500;
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
 
 		if ( $stmt->prepare($sql) &&
@@ -624,10 +624,10 @@ class Helper
 		) {
 			$response['code'] = 200;
 			$response['workareas'] = array();
-		
+
 			$index = -1;
 
-			$oldrank = -1;	
+			$oldrank = -1;
 			while ($stmt->fetch() ) {
 				if ($oldrank != $rank )   {
 					$index++;
@@ -640,7 +640,7 @@ class Helper
 				$response['workareas'][$index]['times'][] = $hours;
 			}
 
-			$stmt->close();	
+			$stmt->close();
 		} else {
 			$response['message'] = $stmt->error;
 			$stmt->close();
@@ -650,7 +650,7 @@ class Helper
 	}
 
 	function restapi_moderation_freeze_userinput_list($arrayData) {
-	
+
 		$id = $arrayData->moduserid;
 		$sql = "SELECT idFreeze, freezedate FROM aplan_freeze WHERE user=? ORDER BY freezedate DESC";
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
@@ -666,15 +666,15 @@ class Helper
 				$response['data'][] = array();
 				$response['data'][$index]['idFreeze'] = $idFreeze;
 				$response['data'][$index]['freezedate'] = $freezedate;
-				$index++;	
+				$index++;
 			}
 
 			$response['message'] = "ok";
 			$stmt->close();
 		}
 
-		
-		return $response;	
+
+		return $response;
 	}
 
 	function restapi_moderation_freeze_delete($idToDelete) {
@@ -682,7 +682,7 @@ class Helper
 		$response["message"] = "not ok";
 		$sql = "DELETE FROM aplan_freeze WHERE idFreeze=?";
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-		
+
 		if ($stmt->prepare($sql) &&
 			$stmt->bind_param("i", $idToDelete) &&
 			$stmt->execute() ) {
@@ -690,7 +690,7 @@ class Helper
 			$response["message"] = "ok";
 			$stmt->close();
 		}
-	
+
 		return $response;
 	}
 
@@ -732,9 +732,9 @@ class Helper
 		$sql = "INSERT INTO aplan_bonus_times (user, bonus_minutes, bonus_date, short_description) VALUES (?, ?, ?, ?)";
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 
-		if ($stmt->prepare($sql) && $stmt->bind_param("iiss", $userid, $time, $qdate, $reason) && 
+		if ($stmt->prepare($sql) && $stmt->bind_param("iiss", $userid, $time, $qdate, $reason) &&
 			$stmt->execute() && $stmt->close() ) {
-			
+
 			$response['status'] = "ok";
 			$response['code'] = 200;
 		} else {
@@ -743,11 +743,11 @@ class Helper
 			$response['text'] = mysqli_error($this->dbx->getDatabaseConnection()) .  " userid: $userid";
 		}
 
-		return $response;	
-		
-	}	
+		return $response;
 
-		
+	}
+
+
 
     function restapi_scheduleitems_delete($userid, $data)
     {
@@ -1118,12 +1118,12 @@ class Helper
     }
 
     //! Creates a dataset in table aplan_holliday_setup
-    //! The parameter needs to have the following fields: 
+    //! The parameter needs to have the following fields:
     //!  startdate DATE in format YYYY-MM-DD
     //!  enddate DATE in format YYYY-MM-DD
     //!  days INT Number of days
     //!  minutes INT Number of minutes
-    //!  userid INT user id 
+    //!  userid INT user id
     function restapi_hollidays_create($arrData)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
@@ -1271,7 +1271,7 @@ class Helper
 			$response["status"] = 501;
 			return $response;
 		}
-            
+
 		if (!isset($arrData->enddate)) {
 			$response["status"] = 502;
 			return $response;
@@ -1291,7 +1291,7 @@ class Helper
 			$response["status"] = 505;
 			return $response;
 		}
-            
+
 		$startdate = $arrData->startdate;
 		$enddate = $arrData->enddate;
 		$nbrdays = $arrData->days;
@@ -1750,7 +1750,7 @@ class Helper
 		$stmt->prepare($sql) &&
 		$stmt->bind_param("iss", $use , $dbStartDate, $dbEndDate ) &&
 		$stmt->execute() &&
-		$stmt->bind_result($mins) 
+		$stmt->bind_result($mins)
 	) {
 
 		while ($stmt->fetch() ) {
@@ -2306,7 +2306,7 @@ class Helper
 
 		$sql = "SELECT idBonus, bonus_minutes, short_description FROM aplan_bonus_times WHERE user=? AND bonus_date = ?";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
-		if ( 
+		if (
 			$stmt->prepare($sql) &&
 			$stmt->bind_param("is", $id, $date) &&
 			$stmt->execute() &&
@@ -2330,7 +2330,7 @@ class Helper
 	function restapi_isBlocked($id, $date) {
 		$sql = "SELECT idFreeze FROM aplan_freeze WHERE user=? AND freezedate >= ?";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
-		if ( 
+		if (
 			$stmt->prepare($sql) &&
 			$stmt->bind_param("is", $id, $date) &&
 			$stmt->execute() &&
@@ -2392,7 +2392,7 @@ class Helper
             }
 
         }
-	
+
         $stmt->close();
         return $arrData;
 
@@ -2601,7 +2601,7 @@ class Helper
     }
 
 
-	// 
+	//
 	function getTableDaysWithHollidayId($user, $start, $end, $hollidayId) {
 		$sql = "SELECT dateofday FROM aplan_arbeitstage WHERE holliday_id=? AND dateofday >= ? AND dateofday < ? AND user_id=?";
 		$stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
@@ -2686,7 +2686,7 @@ class Helper
 			$tempDate = strtotime($workTable["days"][$i]);
 			$dow = date ("w", $tempDate);
 			if ($dow == 0) $dow = 6;
-			else { 
+			else {
 				$dow--;
 			}
 			$result += $workTable["todo"][$dow];
@@ -2715,7 +2715,7 @@ class Helper
 		} else {
 			return 0;
 		}
-		
+
 		$stmt->close();
 		return $totalTime;
 	}
@@ -2774,16 +2774,17 @@ class Helper
     }
 
     function getPeriodStartWithDate($user, $date) {
-        $sql = "SELECT A.period_start FROM aplan_periods AS A ";
+        $sql = "SELECT MAX(A.period_start) FROM aplan_periods AS A ";
         $sql .= "LEFT JOIN aplan_periods_start_values AS B ";
         $sql .= "ON A.idPeriod = B.idPeriod ";
-        $sql .= " WHERE B.user=? AND A.period_start <= ? AND A.period_end >= ?";
+        //$sql .= " WHERE B.user=? AND A.period_start <= ? AND A.period_end >= ?";
+        $sql .= " WHERE B.user=? AND A.period_start <= ?";
         $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
         $sdate = "2010-01-01";
 
         if (! $stmt->prepare($sql)) return 0;
 
-        if ( ! $stmt->bind_param("iss", $user, $date, $date) ) return 0;
+        if ( ! $stmt->bind_param("is", $user, $date) ) return 0;
 
         if ( $stmt->execute() && $stmt->bind_result($sdate) && $stmt->fetch() ) {
 
@@ -2899,13 +2900,13 @@ class Helper
         }
         $stmt->close();
 
-	// retrieve bonus / subtraction times 
+	// retrieve bonus / subtraction times
 	$strStartDate = date("Y-m-d", $startDate);
 	$strEndDate = date("Y-m-d", $dateEnd);
 	$sql = "SELECT bonus_minutes FROM aplan_bonus_times WHERE user=? AND bonus_date >= ? AND bonus_date < ?";
 	$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-	if ($stmt->prepare($sql) && 
-		$stmt->bind_param("iss", $user, $strStartDate, $strEndDate) && 
+	if ($stmt->prepare($sql) &&
+		$stmt->bind_param("iss", $user, $strStartDate, $strEndDate) &&
 		$stmt->execute() && $stmt->bind_result($bonus) ) {
 
 		while($stmt->fetch() ) {
@@ -2914,8 +2915,8 @@ class Helper
 
 		$stmt->close();
 	}
-	
-		
+
+
         return $result;
     }
 
@@ -4372,7 +4373,7 @@ class Helper
 
 	if ($prefix == "-") $r *= -1;
 
-	return $r;	
+	return $r;
     }
 
     function intToTime($tval) {
@@ -4385,7 +4386,7 @@ class Helper
 	$m = $tval - ($h * 60);
 	$superzero = "";
 	if ($m < 10 ) $superzero = "0";
-	
+
 	return "$sign$h:$superzero$m";
 
     }
