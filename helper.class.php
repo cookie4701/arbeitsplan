@@ -2433,7 +2433,7 @@ class Helper
     }
 
     function getHollidaysTakenBetween($user, $startDate, $endDate) {
-        $sql = "SELECT COUNT(id) FROM aplan_arbeitstage WHERE user_id=? AND dateofday >= ? AND dateofday <= ? AND holliday_id=2";
+        $sql = "SELECT COUNT(id) FROM aplan_arbeitstage WHERE user_id=? AND dateofday >= ? AND dateofday < ? AND holliday_id=2";
         $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
         if (! $stmt->prepare($sql)) return 0;
         $nbrDaysTaken = 0;
@@ -2526,7 +2526,7 @@ class Helper
     }
 
     function getVacationDaysTakenInPeriod($user, $startDate, $endDate) {
-        $sql = "SELECT COUNT(id) FROM aplan_arbeitstage WHERE user_id=? AND dateofday >= ? AND dateofday <= ? AND holliday_id=3";
+        $sql = "SELECT COUNT(id) FROM aplan_arbeitstage WHERE user_id=? AND dateofday >= ? AND dateofday < ? AND holliday_id=3";
         $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
         if (! $stmt->prepare($sql)) return 0;
         $nbrDaysTaken = 0;
@@ -2774,13 +2774,14 @@ class Helper
     }
 
     function getPeriodStartWithDate($user, $date) {
+        $sdate = $this->getPeriodStart($user);
         $sql = "SELECT MAX(A.period_start) FROM aplan_periods AS A ";
         $sql .= "LEFT JOIN aplan_periods_start_values AS B ";
         $sql .= "ON A.idPeriod = B.idPeriod ";
         //$sql .= " WHERE B.user=? AND A.period_start <= ? AND A.period_end >= ?";
         $sql .= " WHERE B.user=? AND A.period_start <= ?";
         $stmt = $this->getDatabaseConnection()->getDatabaseConnection()->stmt_init();
-        $sdate = "2010-01-01";
+        //$sdate = "2010-01-01";
 
         if (! $stmt->prepare($sql)) return 0;
 
