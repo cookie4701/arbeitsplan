@@ -20,5 +20,22 @@ $dataInput = file_get_contents("php://input");
 
 $msg = $helper->restapi_workareas_update_visible($userid, $dataInput);
 
-echo $msg;
+$r = array();
+
+$r['code'] = 200;
+$r['message'] = "OK";
+
+if ($msg == "ok") {
+    header('HTTP/1.1 200 OK');
+        
+} else {
+    header('HTTP/1.1 500 Internal Server Error');
+    $r['code'] = 500;
+    $r['message'] = "NOT OK";
+}
+
+echo json_encode($r);
+
+
+
 

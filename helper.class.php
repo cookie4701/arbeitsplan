@@ -1482,6 +1482,141 @@ class Helper
         return $msg;
 
     }
+    
+    function restapi_workareas_update_short($userid, $data) {
+        $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "UPDATE aplan_workfields SET description=? ";
+        $sql .= "WHERE user=? AND id = ?";
+        $msg = "not ok";
+
+        if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+        $arrData = json_decode($data);
+
+        $idWorkarea = -1;
+        $short = "";
+
+        if ($stmt->prepare($sql)) {
+
+            if ($stmt->bind_param("sii", $short, $userid, $idWorkarea)) {
+                $msg = "ok";
+            } else {
+                $msg = "not ok " . $stmt->error;
+            }
+
+        } else {
+            $msg = "prepare failed " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        }
+
+        $idWorkarea = $arrData->idWorkarea;
+        $short = $arrData->short;
+
+        if (!$stmt->execute()) {
+            $msg = "Mysql error: " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        } else {
+            $msg = "ok";
+        }
+
+        return $msg;
+
+    }
+    
+    function restapi_workareas_update_timecapital($userid, $data) {
+        $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "UPDATE aplan_workfields SET timecapital=? ";
+        $sql .= "WHERE user=? AND id = ?";
+        $msg = "not ok";
+
+        if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+        $arrData = json_decode($data);
+
+        $idWorkarea = -1;
+        $time = "";
+
+        if ($stmt->prepare($sql)) {
+
+            if ($stmt->bind_param("iii", $time, $userid, $idWorkarea)) {
+                $msg = "ok";
+            } else {
+                $msg = "not ok " . $stmt->error;
+            }
+
+        } else {
+            $msg = "prepare failed " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        }
+
+        $idWorkarea = $arrData->idWorkarea;
+        $short = $arrData->timecapital;
+
+        if (!$stmt->execute()) {
+            $msg = "Mysql error: " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        } else {
+            $msg = "ok";
+        }
+
+        return $msg;
+
+    }
+    
+    function restapi_workareas_update_visible($userid, $data) {
+        $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "UPDATE aplan_workfields SET visible=? ";
+        $sql .= "WHERE user=? AND id = ?";
+        $msg = "not ok";
+
+        if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+        $arrData = json_decode($data);
+
+        $idWorkarea = -1;
+        $visible = "";
+
+        if ($stmt->prepare($sql)) {
+
+            if ($stmt->bind_param("iii", $visible, $userid, $idWorkarea)) {
+                $msg = "ok";
+            } else {
+                $msg = "not ok " . $stmt->error;
+            }
+
+        } else {
+            $msg = "prepare failed " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        }
+
+        $idWorkarea = $arrData->idWorkarea;
+        $short = $arrData->visible;
+
+        if (!$stmt->execute()) {
+            $msg = "Mysql error: " . $stmt->error;
+            $stmt->close();
+            return $msg;
+        } else {
+            $msg = "ok";
+        }
+
+        return $msg;
+
+    }
 
     function restapi_workareas_update($userid, $data)
     {
