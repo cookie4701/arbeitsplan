@@ -1,0 +1,34 @@
+@startuml
+
+class workareas {
+	+create
+	+delete.php
+	+read.php
+	+update.php
+	+update_explanation.php
+	+update_short.php
+	+update_timecapital.php
+	+update_visible.php
+}
+
+class Helper {
+	+restapi_workareas_create($userid, $data: CREATEDATA)
+	+restapi_workareas_update($userid, $data)
+	+restapi_workareas_read($userid, $data)
+	+restapi_workareas_delete($userid, $data)
+	+restapi_workareas_update_explanation($userid, $data)
+	+restapi_workareas_update_short($userid, $data)
+	+restapi_workareas_update_timecapital($userid, $data)
+	+restapi_workareas_update_visible($userid, $data)
+}
+
+json CREATEDATA {
+	"short" : "String: Short description",
+	"explanation" : "String: Explanation",
+	"timecapital" : "Int: Timecapital for workarea in hours",
+	"visible" : "Int: 1 for visible, 0 for invisible"
+}
+
+Helper::restapi_workareas_create --> CREATEDATA
+workareas::create --> Helper::restapi_workareas_create 
+@enduml
