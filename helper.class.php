@@ -1618,10 +1618,27 @@ class Helper
 
     }
 
+function data_contains_visible_field($arrData) {
+
+	if (is_array( $arrData ) ) {
+		// is array
+		if ( array_key_exists('visible', $arrData[0]) ) return true
+	}
+	else {
+		// no array
+		if ( array_key_exists('visible', $arrData) ) return true;
+	}
+	
+	return false;
+}
+
     function restapi_workareas_update($userid, $data)
     {
+	$arrData = json_decode($data);
+	
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET rank=?, explanation=?, description=?, timecapital=? ";
+	if ( data_contains_visible_field($arrData) $sql .= ", is_visible=? ";
         $sql .= "WHERE user=? AND id = ?";
         $msg = "not ok";
 
@@ -1630,7 +1647,7 @@ class Helper
             return $msg;
         }
 
-        $arrData = json_decode($data);
+        
 
         // default values
         $rank = 1000;
@@ -1638,15 +1655,27 @@ class Helper
         $description = '';
         $timecapital = 0;
         $idWorkarea = -1;
+	$visible = 0;
 
         if ($stmt->prepare($sql)) {
+	
+		$str_param_list = "issiii";
+		if (data_contains_visible_field($arrData) ) {
+			$str_param_list .= "i";
+			if ($stmt->bind_param($str_param_list, $rank, $explanation, $description, $timecapital, $userid, $idWorkarea, $visible)) {
+				$msg = "ok";
+			} else {
+				$msg = "not ok " . $stmt->error;
+			}
+		} else {
 
-            if ($stmt->bind_param("issiii", $rank, $explanation, $description, $timecapital, $userid, $idWorkarea)) {
-                $msg = "ok";
-            } else {
-                $msg = "not ok " . $stmt->error;
-            }
-
+		    if ($stmt->bind_param($str_param_list, $rank, $explanation, $description, $timecapital, $userid, $idWorkarea)) {
+			$msg = "ok";
+		    } else {
+			$msg = "not ok " . $stmt->error;
+		    }
+		}
+		
         } else {
             $msg = "prepare failed " . $stmt->error;
             $stmt->close();
@@ -1660,8 +1689,9 @@ class Helper
                 $rank = intval($arrData[$i]->rank);
             }
 
-            if (isset($arrData[$i]->timecapital) && intval($arrData[$i]->timecapital) > 0 && intval($arrData[$i]->timecapital) <= 10000) {
+            if (isset($arrData[$i]->timecapital) && intval($arrData[$i]->timecapital) >= 0 && intval($arrData[$i]->timecapital) <= 10000) {
                 $timecapital = intval($arrData[$i]->timecapital);
+		if ($timecapital == 0) $timecapital = 1;
             }
 
             if (isset($arrData[$i]->explanation)) {
@@ -1674,6 +1704,9 @@ class Helper
 
             if (isset($arrData[$i]->idWorkarea)) {
                 $idWorkarea = $arrData[$i]->idWorkarea;
+            }
+	    if (isset($arrData[$i]->visible)) {
+                $visible = $arrData[$i]->visible;
             }
 
             if (!$stmt->execute()) {
