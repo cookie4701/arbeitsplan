@@ -1604,11 +1604,15 @@ class Helper
         }
 
         $idWorkarea = $arrData->idWorkarea;
-	if ($arrData->visible == "true" )
+	if ($arrData->visible == true )
+	{
 		$visible = 1;
+	}
 	else
+	{
 		$visible = 0;
-
+	}
+	
         if (!$stmt->execute()) {
             $msg = "Mysql error: " . $stmt->error;
             $stmt->close();
