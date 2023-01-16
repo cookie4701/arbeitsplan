@@ -1622,7 +1622,7 @@ function data_contains_visible_field($arrData) {
 
 	if (is_array( $arrData ) ) {
 		// is array
-		if ( array_key_exists('visible', $arrData[0]) ) return true
+		if ( array_key_exists('visible', $arrData[0]) ) return true;
 	}
 	else {
 		// no array
