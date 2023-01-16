@@ -1638,7 +1638,7 @@ function data_contains_visible_field($arrData) {
 	
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET rank=?, explanation=?, description=?, timecapital=? ";
-	if ( data_contains_visible_field($arrData) $sql .= ", is_visible=? ";
+	if ( data_contains_visible_field($arrData) ) $sql .= ", is_visible=? ";
         $sql .= "WHERE user=? AND id = ?";
         $msg = "not ok";
 
