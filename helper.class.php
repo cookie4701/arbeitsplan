@@ -1559,7 +1559,7 @@ class Helper
         }
 
         $idWorkarea = $arrData->idWorkarea;
-        $short = $arrData->timecapital;
+        $time = $arrData->timecapital;
 
         if (!$stmt->execute()) {
             $msg = "Mysql error: " . $stmt->error;
@@ -1604,7 +1604,10 @@ class Helper
         }
 
         $idWorkarea = $arrData->idWorkarea;
-        $visible = $arrData->visible;
+	if ($arrData->visible == "true" )
+		$visible = 1;
+	else
+		$visible = 0;
 
         if (!$stmt->execute()) {
             $msg = "Mysql error: " . $stmt->error;
