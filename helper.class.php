@@ -2348,8 +2348,8 @@ function data_contains_visible_field($arrData) {
      */
     function restapi_helper_getInfoDay($id, $date)
     {
-        // check if day exists in tables aplan_daydescrptions and aplan_workday
-        // if not, create the day by inserting empty datasets
+            // check if day exists in tables aplan_daydescrptions and aplan_workday
+            // if not, create the day by inserting empty datasets
         $this->createIfNotExistsDaydescription($id, $date);
         $this->createIfNotExistsWorkday($id, $date);
         $this->createIfNotExistsArbeitstage($id, $date);
@@ -2361,9 +2361,9 @@ function data_contains_visible_field($arrData) {
 
         $dayInfo['schedule'] = $this->getSchedule($id, $date);
 
-	$dayInfo['inputblocked'] = $this->restapi_isBlocked($id, $date);
+        $dayInfo['inputblocked'] = $this->restapi_isBlocked($id, $date);
 
-	$dayInfo['bonus'] = $this->restapi_get_bonus_time($id, $date);
+        $dayInfo['bonus'] = $this->restapi_get_bonus_time($id, $date);
 
         //@test: get from to workhours
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
@@ -2393,7 +2393,7 @@ function data_contains_visible_field($arrData) {
 
         //@test: get workareas
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $stmt->prepare("SELECT A.hours AS hours, B.rank, A.id, B.description FROM " . CConfig::$db_tbl_prefix . "workday AS A LEFT JOIN " . CConfig::$db_tbl_prefix . "workfields AS B ON A.workfield_id=B.rank WHERE A.user_id=? AND A.date=? AND B.user = ? ORDER BY rank");
+        $stmt->prepare("SELECT A.hours AS hours, B.rank, A.id, B.description FROM " . CConfig::$db_tbl_prefix . "workday AS A LEFT JOIN " . CConfig::$db_tbl_prefix . "workfields AS B ON A.workfield_id=B.rank WHERE A.user_id=? AND A.date=? AND B.user = ? AND B.is_visible = 1 ORDER BY rank");
         $stmt->bind_param("isi", $id, $date, $id);
         $hours = "";
         $rank = "";
