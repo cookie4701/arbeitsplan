@@ -31,7 +31,7 @@ if ($msg == "ok") {
 } else {
     header('HTTP/1.1 500 Internal Server Error');
     $r['code'] = 500;
-    $r['message'] = "NOT OK";
+    $r['message'] = "NOT OK $msg" ;
 }
 
 echo json_encode($r);
