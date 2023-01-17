@@ -5,6 +5,9 @@ include_once 'database.class.php';
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
 
+error_reporting(E_NONE);
+ini_set('display_errors', 0);
+
 //phpinfo();
 
 if (PHP_VERSION_ID < 50600) {

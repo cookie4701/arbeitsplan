@@ -1,7 +1,7 @@
 <?php
 // required headers
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+//header("Access-Control-Allow-Origin: *");
+//header("Content-Type: application/json; charset=UTF-8");
 
 
 require("../cors.php");
@@ -26,6 +26,8 @@ $r['code'] = 200;
 $r['message'] = "OK";
 
 if ($msg == "ok") {
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json; charset=UTF-8");
     header('HTTP/1.1 200 OK');
         
 } else {
