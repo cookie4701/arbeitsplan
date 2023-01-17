@@ -1587,7 +1587,7 @@ class Helper
         $arrData = json_decode($data);
 
         $idWorkarea = -1;
-        $visible = "";
+        $visible = 0;
 
         if ($stmt->prepare($sql)) {
 
