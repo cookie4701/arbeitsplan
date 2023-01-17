@@ -3,3 +3,6 @@ config.php.*
 config.php
 *.swp
 testing/session.cookie
+.buildpath
+.project
+.settings/*
