@@ -1604,7 +1604,7 @@ class Helper
         }
 
         $idWorkarea = $arrData->idWorkarea;
-	if ($arrData->visible == true )
+	if ($arrData->visible == 1 )
 	{
 		$visible = 1;
 	}
