@@ -1575,7 +1575,7 @@ class Helper
     
     function restapi_workareas_update_visible($userid, $data) {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "UPDATE aplan_workfields SET visible=? ";
+        $sql = "UPDATE aplan_workfields SET is_visible=? ";
         $sql .= "WHERE user=? AND id = ?";
         $msg = "not ok";
 
@@ -1734,7 +1734,7 @@ function data_contains_visible_field($arrData) {
     function restapi_workareas_read($userid)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "SELECT id, rank, description, explanation, timecapital FROM aplan_workfields WHERE user=? ORDER BY rank";
+        $sql = "SELECT id, rank, description, explanation, timecapital, is_visible FROM aplan_workfields WHERE user=? ORDER BY rank";
         $reco = array();
 
         if ($stmt->prepare($sql)) {
@@ -1744,7 +1744,8 @@ function data_contains_visible_field($arrData) {
                     $rank,
                     $description,
                     $explanation,
-                    $timecapital);
+                    $timecapital,
+                    $visible);
 
                 while ($stmt->fetch()) {
                     $item = array(
@@ -1752,7 +1753,8 @@ function data_contains_visible_field($arrData) {
                         "rank" => $rank,
                         "description" => $description,
                         "explanation" => $explanation,
-                        "timecapital" => $timecapital
+                        "timecapital" => $timecapital,
+                        "visible" => $visible
                     );
                     $reco[] = $item;
                 }
