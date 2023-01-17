@@ -1607,10 +1607,12 @@ class Helper
 	if ($arrData->visible == 1 )
 	{
 		$visible = 1;
+		$msg .= "visible $visible";
 	}
 	else
 	{
 		$visible = 0;
+		$msg .= "visible $visible";
 	}
 	
         if (!$stmt->execute()) {
