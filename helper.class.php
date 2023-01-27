@@ -1392,7 +1392,7 @@ class Helper
     function restapi_workareas_create($userid, $data)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "INSERT INTO aplan_workfields (rank, explanation, description, user, timecapital, visible) ";
+        $sql = "INSERT INTO aplan_workfields (rank, explanation, description, user, timecapital, is_visible) ";
         $sql .= "VALUES (?, ?, ?, ?, ?, 1)";
         $msg = "not ok";
 
