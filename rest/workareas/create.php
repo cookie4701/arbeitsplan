@@ -1,7 +1,7 @@
 <?php
 // required headers
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+//header("Access-Control-Allow-Origin: *");
+//header("Content-Type: application/json; charset=UTF-8");
 
 
 require("../cors.php");
@@ -20,15 +20,25 @@ $dataInput = file_get_contents("php://input");
 
 $msg = $helper->restapi_workareas_create($userid, $dataInput);
 
-if ($msg != "ok") {
 
-    $emptyArray = array();
-    echo json_encode($emptyArray);
-    die;
+$r = array();
+
+$r['code'] = 200;
+$r['message'] = "OK";
+
+if ($msg == "ok") {
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json; charset=UTF-8");
+    header('HTTP/1.1 200 OK');
+    
 } else {
-    $data = $helper->restapi_workareas_read($userid);
-    echo json_encode($data);
+    header('HTTP/1.1 500 Internal Server Error');
+    $r['code'] = 500;
+    $r['message'] = "NOT OK $msg" ;
 }
+
+echo json_encode($r);
+
 
 
 
