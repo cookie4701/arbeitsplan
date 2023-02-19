@@ -305,6 +305,30 @@ class Helper
         }
     }
 
+  //! Create new user
+  function restapi_user_create($data) {
+      $sql = "INSERT INTO aplan_users (uname, email, reg_date, session_id, password, status, alteueberstunden, feiertage, urlaubstage, kmsatz, startdate, report_year, dname) VALUES (?, ?, NOW(), 0, ?, 1, 0, 0, 0, 0.1234, ?, 2020, ?)";
+
+      $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+      $response['status'] = 500;
+      $response['message'] = 'Incomplete';
+
+      $arr = json_decode($data);
+
+      $uname = $arr->username;
+      $email = $arr->email;
+      $password = $arr->password;
+      $startdate = TransformDateToUS(  $arr->startdate );
+      $displayname = $arr->displayname;
+
+      if (! $stmt->prepare($sql)
+        && $stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)
+      ) {
+    
+      }
+
+  }
+
 	//! Get holliay periods for a given user
 	function restapi_get_holliday_periods($userid) {
 		$sql = "SELECT idHolliday, startdate, enddate, nbrdays, nbrminutes FROM aplan_holliday_setup WHERE userid=? ORDER BY startdate DESC";
