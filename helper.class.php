@@ -324,7 +324,7 @@ class Helper
       if (! $stmt->prepare($sql)
         && $stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)
       ) {
-    
+
       }
 
   }
@@ -986,7 +986,7 @@ class Helper
             $idSchedule = $arrData->idSchedule;
 
             if ($stmt->bind_param("sssii", $startdate, $enddate, $label, $userid, $idSchedule) && $stmt->execute()) {
-                echo $stmt->affected_rows;
+                
                 $msg = "ok";
             } else {
                 $msg = "not ok " . $stmt->error;
@@ -1509,7 +1509,7 @@ class Helper
         return $msg;
 
     }
-    
+
     function restapi_workareas_update_short($userid, $data) {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET description=? ";
@@ -1554,7 +1554,7 @@ class Helper
         return $msg;
 
     }
-    
+
     function restapi_workareas_update_timecapital($userid, $data) {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET timecapital=? ";
@@ -1599,7 +1599,7 @@ class Helper
         return $msg;
 
     }
-    
+
     function restapi_workareas_update_visible($userid, $data) {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET is_visible=? ";
@@ -1641,7 +1641,7 @@ class Helper
 		$visible = 0;
 		$msg .= "visible $visible";
 	}
-	
+
         if (!$stmt->execute()) {
             $msg = "Mysql error: " . $stmt->error;
             $stmt->close();
@@ -1664,14 +1664,14 @@ function data_contains_visible_field($arrData) {
 		// no array
 		if ( array_key_exists('visible', $arrData) ) return true;
 	}
-	
+
 	return false;
 }
 
     function restapi_workareas_update($userid, $data)
     {
 	$arrData = json_decode($data);
-	
+
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
         $sql = "UPDATE aplan_workfields SET rank=?, explanation=?, description=?, timecapital=? ";
 	if ( data_contains_visible_field($arrData) ) $sql .= ", is_visible=? ";
@@ -1683,7 +1683,7 @@ function data_contains_visible_field($arrData) {
             return $msg;
         }
 
-        
+
 
         // default values
         $rank = 1000;
@@ -1694,7 +1694,7 @@ function data_contains_visible_field($arrData) {
 	$visible = 0;
 
         if ($stmt->prepare($sql)) {
-	
+
 		$str_param_list = "issiii";
 		if (data_contains_visible_field($arrData) ) {
 			$str_param_list .= "i";
@@ -1711,7 +1711,7 @@ function data_contains_visible_field($arrData) {
 			$msg = "not ok " . $stmt->error;
 		    }
 		}
-		
+
         } else {
             $msg = "prepare failed " . $stmt->error;
             $stmt->close();
