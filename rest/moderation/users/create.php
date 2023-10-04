@@ -29,7 +29,7 @@ if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
 } else {
-    $createUser = $helper->restapi_user_create($dataInput->userId, json_encode($dataInput));
+    $createUser = $helper->restapi_user_create(json_encode($dataInput));
     if ( $createUser == 'ok' ) {
 	header("HTTP/1.1 200 OK");
     } else {

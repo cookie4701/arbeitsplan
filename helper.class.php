@@ -305,29 +305,62 @@ class Helper
         }
     }
 
+	// creates response strucutre
+	function response($status_code, $message) {
+		$response = array();
+		$response['status'] = $status_code;
+		$response['message'] = $message;
+		return $response;
+	}
+
   //! Create new user
-  function restapi_user_create($data) {
-      $sql = "INSERT INTO aplan_users (uname, email, reg_date, session_id, password, status, alteueberstunden, feiertage, urlaubstage, kmsatz, startdate, report_year, dname) VALUES (?, ?, NOW(), 0, ?, 1, 0, 0, 0, 0.1234, ?, 2020, ?)";
+function restapi_user_create($data) {
+	$response = $this->response(500, "Unkown error");
 
-      $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-      $response['status'] = 500;
-      $response['message'] = 'Incomplete';
+	// extract values
+	$arr = json_decode($data);
 
-      $arr = json_decode($data);
+	$uname = $arr->username;
+	$email = $arr->email;
+	$password = $arr->password;
+	$startdate = TransformDateToUS(  $arr->startdate );
+	$displayname = $arr->displayname;
 
-      $uname = $arr->username;
-      $email = $arr->email;
-      $password = $arr->password;
-      $startdate = TransformDateToUS(  $arr->startdate );
-      $displayname = $arr->displayname;
+	// check values
+	if ( ! isset($uname) || $uname == "" ) return $this->response(501, "No username given");
+	if ( ! isset($email) || $email == "" ) return $this->response(502, "No email address given");
+	if ( ! isset($password) || $password == "" ) return $this->response(503, "No password was set");
+	if ( ! isset($startdate) || $startdate == "" ) return $this->response(504, "No startdate submitted");
+	if ( ! isset($displayname) || $displayname == "" ) return $this->response(505, "No displayname given");
 
-      if (! $stmt->prepare($sql)
-        && $stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)
-      ) {
+	// Check if user exists
+	$sqlSelect = "SELCT id, uname from aplan_users where uname = ?";
+	$stmt_select = $this->dbx->getDatabaseConnection()->stmt_init();
+	if (! $stmt_select->bind_param("s", $uname) ) return $this->response(506, "Unable to bind param uname");
+	if (! $stmt_select->execute() ) return $this->response(507, "Unable to execute statement " . $stmt_select->error );
+	if (! $stmt_select->bind_result($dbId, $dbUsername) ) return $this->response(508, "Unable to bind result");
 
-      }
+	if ( $stmt_select->fetch() ) return $this->response(509, "User already exists");
 
-  }
+	$stmt_select->close();
+
+	// Insert data as new user
+
+	$sql = "INSERT INTO aplan_users (uname, email, reg_date, session_id, password, status, alteueberstunden, feiertage, urlaubstage, kmsatz, startdate, report_year, dname) VALUES (?, ?, NOW(), 0, ?, 1, 0, 0, 0, 0.1234, ?, 2020, ?)";
+
+	$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+
+	if (! $stmt->prepare($sql) return $this->response(510, "Error on sql prepapre (insert)"); 
+
+	if (!$stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)) 
+		return $this->response(511, "Error on binding parameters (insert)");
+
+	if ( ! $stmt->execute() ) return $this->response(511, "Error on executing query (insert)")
+
+	$stmt->close();
+	return $this->response(200, "OK");
+
+}
 
 	//! Get holliay periods for a given user
 	function restapi_get_holliday_periods($userid) {
