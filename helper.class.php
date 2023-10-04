@@ -355,7 +355,7 @@ function restapi_user_create($data) {
 	if (!$stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)) 
 		return $this->response(511, "Error on binding parameters (insert)");
 
-	if ( ! $stmt->execute() ) return $this->response(511, "Error on executing query (insert)")
+	if ( ! $stmt->execute() ) return $this->response(511, "Error on executing query (insert)");
 
 	$stmt->close();
 	return $this->response(200, "OK");
