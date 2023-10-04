@@ -350,7 +350,7 @@ function restapi_user_create($data) {
 
 	$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 
-	if (! $stmt->prepare($sql) return $this->response(510, "Error on sql prepapre (insert)"); 
+	if (! $stmt->prepare($sql)) return $this->response(510, "Error on sql prepapre (insert)"); 
 
 	if (!$stmt->bind_param("sssss", $uname, $email, $password, $startdate, $displayname)) 
 		return $this->response(511, "Error on binding parameters (insert)");
