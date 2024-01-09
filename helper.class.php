@@ -1138,8 +1138,6 @@ function restapi_user_create($data) {
 		} else {
 			return $ret;
 		}
-
-
 	}
 
 	function restapi_driverecompensation_delete($data)
