@@ -1090,6 +1090,161 @@ function restapi_user_create($data) {
 
     }
 
+	function restapi_driverecompensation_read($data)
+	{
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "SELECT idDrive, userid, startdate, enddate, val FROM aplan_drive_recompensation userid = ? ORDER BY startdate DESC";
+		$ret = array();
+		$ret['message'] = "not ok";
+        
+		if (get_class($stmt) !== "mysqli_stmt") {
+            $ret["message"] = "not a mysqli_stmt";
+            return $ret;
+        }
+
+		$arrData = json_decode($data);
+		if (!isset($arrData->id)) {
+			$ret['message'] = "id is missing";
+			return $ret;
+		}
+
+		$id = $arrData->id;
+		
+		if (! $stmt->prepare($sql) ) {
+			$ret['message'] = "prepare failed";
+			return $ret;
+		}
+
+		if (! $stmt->bind_param("i", $id ) ) {
+			$ret["message"] = "query failed: " . $stmt->error;
+			return $ret;
+		}
+		
+		if ($stmt->execute() ) {
+			$stmt->bind_result($idDrive, $userid, $startdate, $enddate, $val);
+			$ret["message"] = "ok";
+			$ret["driverecompensation"] = array();
+			while ($stmt->fetch() ) {
+				$row = array();
+				$row["idDrive"] = $idDrive;
+				$row["userid"] = $userid;
+				$row["startdate"] = $startdate;
+				$row["enddate"] = $enddate;
+				$row["value"] = $val;
+				$ret["driverecompensation"][] = $row;
+			}
+			$stmt->close();
+			return $ret;
+		} else {
+			return $ret;
+		}
+
+
+	}
+
+	function restapi_driverecompensation_delete($data)
+	{
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "DELETE FROM aplan_drive_recompensation where idDrive = ? and userid = ?";
+        
+		if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+		$arrData = json_decode($data);
+		if (!isset($arrData->id)) return "user id missing";
+		if (!isset($arrData->idDrive)) return "idDrive id missing";
+		$id = $arrData->id;
+		$idDrive = $arrData->idDrive;
+		
+		if (! $stmt->prepare($sql) ) return "prepare failed";
+
+		if (! $stmt->bind_param("ii", $idDrive, $id ) ) return "query failed: " . $stmt->error;
+		
+		if ($stmt->execute() ) {
+			$stmt->close();
+			return "ok";
+		} else {
+			return "not ok";
+		}
+	}
+
+	function restapi_driverecompensation_update($data)
+	{
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "UPDATE aplan_drive_recompensation SET ";
+		$sql .= "startdate = ?, ";
+		$sql .= "enddate = ?, ";
+		$sql .= "val = ? ";
+		$sql .= "where idDrive = ? and userid = ?";
+        $msg = "not ok";
+
+        if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+		$arrData = json_decode($data);
+		if (!isset($arrData->startdate)) return "startdate mssing";
+		if (!isset($arrData->enddate)) return "enddate mssing";
+		if (!isset($arrData->val)) return "val missing";
+		if (!isset($arrData->id)) return "user id missing";
+		if (!isset($arrData->idDrive)) return "idDrive id missing";
+		$startdate = $arrData->startdate;
+		$enddate = $arrData->enddate;
+		$val = $arrData->val;
+		$id = $arrData->id;
+		$idDrive = $arrData->idDrive;
+
+		if (! $stmt->prepare($sql) ) return "prepare failed";
+
+		if (! $stmt->bind_param("ssdii", $startdate, $enddate, $val, $idDrive, $id ) ) return "query failed: " . $stmt->error;
+
+		if ($stmt->execute() ) {
+			$stmt->close();
+			return "ok";
+		} else {
+			return "not ok";
+		}
+
+	}
+
+	function restapi_driverecompensation_create($data)
+	{
+		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
+        $sql = "INSERT INTO aplan_drive_recompensation (userid, startdate, enddate, val) ";
+        $sql .= "VALUES (?, ?, ?, ?)";
+        $msg = "not ok";
+
+        if (get_class($stmt) !== "mysqli_stmt") {
+            $msg = "not a mysqli_stmt";
+            return $msg;
+        }
+
+		$arrData = json_decode($data);
+		if (!isset($arrData->startdate)) return "startdate mssing";
+		if (!isset($arrData->enddate)) return "enddate mssing";
+		if (!isset($arrData->val)) return "val missing";
+		if (!isset($arrData->id)) return "user id missing";
+		$startdate = $arrData->startdate;
+		$enddate = $arrData->enddate;
+		$val = $arrData->val;
+		$id = $arrData->id;
+
+		if (! $stmt->prepare($sql) ) return "prepare failed";
+
+		if (! $stmt->bind_param("issd", $id, $startdate, $enddate, $val) ) return "query failed: " . $stmt->error;
+
+		if ($stmt->execute() ) {
+			$stmt->close();
+			return "ok";
+		} else {
+			return "not ok";
+		}
+
+	}
+
     function restapi_drive_recompensation_create($userid, $data)
     {
         $stmt = $this->dbx->getDatabaseConnection()->stmt_init();
