@@ -31,7 +31,7 @@ if ( !isModerator($userid) ) {
 } else {
     $userdataDriveRecompensation = $helper->restapi_driverecompensation_read(json_encode($dataInput));
     if ( $userdataDriveRecompensation['message'] == 'ok' ) {
-		header("HTTP/1.1 200 OK");
+		header("HTTP/1.1 201 OK");
 		echo json_encode($userdataDriveRecompensation);
     } else {
 		header("HTTP/1.1 500 APPLICATION ERROR");
