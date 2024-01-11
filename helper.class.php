@@ -1093,7 +1093,7 @@ function restapi_user_create($data) {
 	function restapi_driverecompensation_read($data)
 	{
 		$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
-        $sql = "SELECT idDrive, userid, startdate, enddate, val FROM aplan_drive_recompensation userid = ? ORDER BY startdate DESC";
+        $sql = "SELECT idDrive, userid, startdate, enddate, val FROM aplan_drive_recompensation WHERE userid = ? ORDER BY startdate DESC";
 		$ret = array();
 		$ret['message'] = "not ok";
         
