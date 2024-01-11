@@ -25,7 +25,7 @@ $dataInput = json_decode($dataInput);
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
 
-} else if (!isset($dataInput->userId) ) {
+} else if (!isset($dataInput->id) ) {
     header("HTTP/1.1 401 Unauthorized");
 
 } else {
