@@ -37,4 +37,4 @@ if ( !isModerator($userid) ) {
     }
 }
 
-echo json_encode($updateDriveRecompensation);
+echo $updateDriveRecompensation;
