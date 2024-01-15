@@ -1151,9 +1151,9 @@ function restapi_user_create($data) {
         }
 
 		$arrData = json_decode($data);
-		if (!isset($arrData->id)) return "user id missing";
+		if (!isset($arrData->userId)) return "user id missing";
 		if (!isset($arrData->idDrive)) return "idDrive id missing";
-		$id = $arrData->id;
+		$id = $arrData->userId;
 		$idDrive = $arrData->idDrive;
 		
 		if (! $stmt->prepare($sql) ) return "prepare failed";
