@@ -27,9 +27,9 @@ if ( !isModerator($userid) ) {
 } else {
 	$createUser = $helper->restapi_user_create(json_encode($dataInput));
 	if ( $createUser == 'ok' ) {
-	header("HTTP/1.1 200 OK");
+		header("HTTP/1.1 200 OK");
 	} else {
-	header("HTTP/1.1 500 APPLICATION ERROR");
+		header("HTTP/1.1 500 APPLICATION ERROR");
 	}
 	echo json_encode($createUser);
 }
