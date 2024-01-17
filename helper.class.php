@@ -326,7 +326,7 @@ function restapi_user_create($data) {
 	$startdate = TransformDateToUS(  $arr->startdate );
 	$displayname = $arr->displayname;
 
-	echi $uname;
+	echo $uname;
 
 	// check values
 	if ( ! isset($uname) || $uname == "" ) return $this->response(501, "No username given");
