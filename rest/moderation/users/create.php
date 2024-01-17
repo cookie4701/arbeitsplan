@@ -22,6 +22,8 @@ require_once ("../../member.php");
 $dataInput = file_get_contents("php://input");
 $dataInput = json_decode($dataInput);
 
+echo "boo";
+
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
     echo "not authorized!";
