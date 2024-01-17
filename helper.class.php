@@ -315,9 +315,6 @@ class Helper
 
   //! Create new user
 function restapi_user_create($data) {
-	ini_set('display_errors', 1);
-	ini_set('display_startup_errors', 1);
-	error_reporting(E_ALL);
 	$response = $this->response(500, "Unkown error");
 
 	// extract values
@@ -326,7 +323,7 @@ function restapi_user_create($data) {
 	$uname = $arr->username;
 	$email = $arr->email;
 	$password = $arr->password;
-	$startdate = TransformDateToUS(  $arr->startdate );
+	$startdate = $this->TransformDateToUS(  $arr->startdate );
 	$displayname = $arr->displayname;
 
 	// check values
