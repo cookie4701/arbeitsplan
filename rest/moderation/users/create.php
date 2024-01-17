@@ -22,12 +22,12 @@ require_once ("../../member.php");
 $dataInput = file_get_contents("php://input");
 $dataInput = json_decode($dataInput);
 
-echo "boo";
 
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
     echo "not authorized!";
 } else {
+	echo "noob";
 	$createUser = $helper->restapi_user_create(json_encode($dataInput));
 	echo json_encode($createUser) . "foo";
 	if ( $createUser["status"] == 200 ) {
