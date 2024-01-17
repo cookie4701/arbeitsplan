@@ -28,10 +28,10 @@ if ( !isModerator($userid) ) {
     echo "not authorized!";
 } else {
 	$createUser = $helper->restapi_user_create(json_encode($dataInput));
-	echo json_encode($createUser) . "foo";
 	if ( $createUser["status"] == 200 ) {
 		header("HTTP/1.1 200 OK");
 	} else {
 		header("HTTP/1.1 500 APPLICATION ERROR");
 	}
+	echo json_encode($createUser);
 }
