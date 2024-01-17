@@ -315,6 +315,9 @@ class Helper
 
   //! Create new user
 function restapi_user_create($data) {
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
 	$response = $this->response(500, "Unkown error");
 
 	// extract values
@@ -346,7 +349,10 @@ function restapi_user_create($data) {
 
 	// Insert data as new user
 
-	$sql = "INSERT INTO aplan_users (uname, email, reg_date, session_id, password, status, alteueberstunden, feiertage, urlaubstage, kmsatz, startdate, report_year, dname) VALUES (?, ?, NOW(), 0, ?, 1, 0, 0, 0, 0.1234, ?, 2020, ?)";
+	$sql = "INSERT INTO aplan_users ";
+	$sql .= "(uname, email, reg_date, session_id, password, status, alteueberstunden, feiertage, urlaubstage, kmsatz, startdate, report_year, dname) ";
+	$sql .= "VALUES ";
+	$sql .= "(?, ?, NOW(), 0, ?, 1, 0, 0, 0, 0.1234, ?, 2020, ?)";
 
 	$stmt = $this->dbx->getDatabaseConnection()->stmt_init();
 

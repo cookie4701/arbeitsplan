@@ -27,7 +27,6 @@ if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
     echo "not authorized!";
 } else {
-	echo "noob";
 	$createUser = $helper->restapi_user_create(json_encode($dataInput));
 	echo json_encode($createUser) . "foo";
 	if ( $createUser["status"] == 200 ) {
