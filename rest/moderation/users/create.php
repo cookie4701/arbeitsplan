@@ -24,15 +24,12 @@ $dataInput = json_decode($dataInput);
 
 if ( !isModerator($userid) ) {
     header("HTTP/1.1 401 Unauthorized");
-
-} else if (!isset($dataInput->userId) ) {
-    header("HTTP/1.1 401 Unauthorized");
-
 } else {
-    $createUser = $helper->restapi_user_create(json_encode($dataInput));
-    if ( $createUser == 'ok' ) {
+	$createUser = $helper->restapi_user_create(json_encode($dataInput));
+	if ( $createUser == 'ok' ) {
 	header("HTTP/1.1 200 OK");
-    } else {
+	} else {
 	header("HTTP/1.1 500 APPLICATION ERROR");
-    }
+	}
+	echo json_encode($createUser);
 }
