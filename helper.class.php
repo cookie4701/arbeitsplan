@@ -334,7 +334,7 @@ function restapi_user_create($data) {
 	if ( ! isset($displayname) || $displayname == "" ) return $this->response(505, "No displayname given");
 
 	// Check if user exists
-	$sqlSelect = "SELCT id, uname from aplan_users where uname = ?";
+	$sqlSelect = "SELECT id, uname from aplan_users where uname = ?";
 	$stmt_select = $this->dbx->getDatabaseConnection()->stmt_init();
 	if (! $stmt_select->prepare($sqlSelect) ) return $this->response(511, "Unable to prepare statement");
 	if (! $stmt_select->bind_param("s", $uname) ) return $this->response(506, "Unable to bind param uname");
